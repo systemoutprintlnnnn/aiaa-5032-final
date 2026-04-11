@@ -16,6 +16,19 @@ def test_health_endpoint_reports_loaded_data():
     assert data["facts"] > 0
 
 
+def test_rag_status_endpoint_reports_default_runtime_mode_without_secret():
+    response = client.get("/api/rag/status")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["retrieval_mode"] == "keyword"
+    assert data["vector_store_enabled"] is False
+    assert data["llm_enabled"] is False
+    assert data["api_key_configured"] is False
+    assert "api_key" not in data
+    assert data["qdrant_collection"] == "mof_evidence"
+
+
 def test_query_endpoint_returns_sources_and_fact_paths():
     response = client.post(
         "/api/query",

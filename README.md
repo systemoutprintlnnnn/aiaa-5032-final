@@ -23,6 +23,7 @@ Health check:
 
 ```bash
 curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:8000/api/rag/status
 ```
 
 Example query:
@@ -60,18 +61,17 @@ http://127.0.0.1:8000/api/query
 Start Qdrant:
 
 ```bash
-docker run -p 6333:6333 qdrant/qdrant
+docker compose up -d qdrant
 ```
 
 Configure API-backed retrieval and answering:
 
 ```bash
-export RAG_API_KEY=...
-export RAG_RETRIEVAL_MODE=hybrid
-export RAG_ENABLE_LLM=true
-export RAG_VECTOR_STORE_URL=http://127.0.0.1:6333
-export RAG_EMBEDDING_MODEL=text-embedding-3-small
-export RAG_LLM_MODEL=gpt-4.1-mini
+cp .env.example .env
+# Fill RAG_API_KEY in .env.
+set -a
+source .env
+set +a
 ```
 
 Build the vector index:
@@ -81,6 +81,8 @@ PYTHONPATH=backend python3 -m app.scripts.index_vectors
 ```
 
 Then start the backend and frontend using the same commands above.
+
+For a fuller local checklist, see `docs/LOCAL_RUNBOOK.md`.
 
 ## Run Tests
 

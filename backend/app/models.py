@@ -39,3 +39,16 @@ class HealthResponse(BaseModel):
     materials: int
     facts: int
     data_source: str
+
+
+class RAGStatusResponse(BaseModel):
+    retrieval_mode: str
+    vector_store_enabled: bool
+    llm_enabled: bool
+    api_key_configured: bool
+    embedding_provider: str
+    embedding_model: str
+    vector_store_url: str
+    qdrant_collection: str
+    llm_provider: str
+    llm_model: str

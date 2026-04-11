@@ -7,7 +7,7 @@ from app.answerers.deterministic import DeterministicAnswerer
 from app.answerers.llm import OpenAILLMAnswerer
 from app.config import get_settings
 from app.knowledge_store import KnowledgeStore
-from app.models import HealthResponse, QueryRequest, QueryResponse
+from app.models import HealthResponse, QueryRequest, QueryResponse, RAGStatusResponse
 from app.rag.embeddings import OpenAIEmbeddingProvider
 from app.rag.vector_store import QdrantVectorStore
 from app.retrievers import HybridRetriever, KeywordRetriever, NoResultGraphRetriever, VectorRetriever
@@ -59,6 +59,22 @@ def health() -> HealthResponse:
         materials=store.material_count,
         facts=len(store.facts),
         data_source=settings.data_source_label,
+    )
+
+
+@app.get("/api/rag/status", response_model=RAGStatusResponse)
+def rag_status() -> RAGStatusResponse:
+    return RAGStatusResponse(
+        retrieval_mode=settings.rag_retrieval_mode,
+        vector_store_enabled=settings.rag_retrieval_mode in {"vector", "hybrid"},
+        llm_enabled=settings.rag_enable_llm,
+        api_key_configured=bool(settings.rag_api_key),
+        embedding_provider=settings.rag_embedding_provider,
+        embedding_model=settings.rag_embedding_model,
+        vector_store_url=settings.rag_vector_store_url,
+        qdrant_collection=settings.rag_qdrant_collection,
+        llm_provider=settings.rag_llm_provider,
+        llm_model=settings.rag_llm_model,
     )
 
 

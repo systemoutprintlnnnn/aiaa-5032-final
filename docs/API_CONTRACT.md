@@ -62,6 +62,27 @@ Response:
 }
 ```
 
+## `GET /api/rag/status`
+
+Returns runtime RAG configuration status without exposing secrets.
+
+Response:
+
+```json
+{
+  "retrieval_mode": "keyword",
+  "vector_store_enabled": false,
+  "llm_enabled": false,
+  "api_key_configured": false,
+  "embedding_provider": "openai",
+  "embedding_model": "text-embedding-3-small",
+  "vector_store_url": "http://127.0.0.1:6333",
+  "qdrant_collection": "mof_evidence",
+  "llm_provider": "openai",
+  "llm_model": "gpt-4.1-mini"
+}
+```
+
 ## Contract Rules
 
 - `sources` must contain the evidence used by the answer.
