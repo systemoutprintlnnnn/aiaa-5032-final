@@ -6,13 +6,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.knowledge_store import KnowledgeStore
 from app.models import HealthResponse, QueryRequest, QueryResponse
-from app.retrievers import KeywordRetriever
+from app.retrievers import HybridRetriever, KeywordRetriever, NoResultGraphRetriever
 from app.services import QueryService
 
 
 settings = get_settings()
 store = KnowledgeStore(settings.open_source_data_dir)
-retriever = KeywordRetriever(store)
+keyword_retriever = KeywordRetriever(store)
+graph_retriever = NoResultGraphRetriever()
+retriever = HybridRetriever([keyword_retriever, graph_retriever])
 query_service = QueryService(retriever)
 
 app = FastAPI(title=settings.app_name, version="0.1.0")

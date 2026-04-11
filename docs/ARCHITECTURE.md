@@ -4,7 +4,7 @@
 
 This project is a FastAPI-based MOF QA system whose runtime knowledge must come from real MOF datasets or KG outputs. `References/` is only design context and must not be indexed into the QA corpus.
 
-## Current MVP
+## Current Local Baseline
 
 ```text
 backend/data/open_source/
@@ -13,10 +13,19 @@ backend/data/open_source/
         v
 KnowledgeStore
   normalizes materials, aliases, properties, synthesis, evidence
+  exposes facts and document-style records
         |
         v
 KeywordRetriever
-  temporary entity/keyword retrieval
+  simple local RAG-style retrieval
+        |
+        v
+NoResultGraphRetriever
+  KG adapter slot until graph data is available
+        |
+        v
+HybridRetriever
+  merges simple RAG evidence and future graph evidence
         |
         v
 QueryService
@@ -35,21 +44,11 @@ frontend/index.html
 Runtime MOF data
   -> data source adapters
   -> normalized facts and documents
-       |                         |
-       v                         v
-  Neo4j graph               Qdrant vector store
-       |                         |
-       v                         v
-  GraphRetriever            VectorRetriever
-       +-----------+-------------+
-                   v
-             Retrieval fusion
-                   |
-                   v
-         evidence-constrained LLM answerer
-                   |
-                   v
-      answer + citations + KG fact paths
+  -> local simple RAG retriever
+  -> optional KG GraphRetriever
+  -> HybridRetriever
+  -> evidence-constrained answerer
+  -> answer + citations + KG fact paths
 ```
 
 ## Backend Boundaries
@@ -58,16 +57,18 @@ Runtime MOF data
 - `app/config.py`: paths and runtime settings.
 - `app/models.py`: API contracts.
 - `app/knowledge_store.py`: temporary in-memory normalized store.
+- `app/stores/`: normalized evidence schemas.
 - `app/retrievers/`: replaceable retrieval adapters.
+- `app/answerers/`: answer composition implementations.
 - `app/services/`: orchestration logic.
 - `app/answerer.py`: answer composition from retrieved evidence.
 
 ## Replacement Path
 
-The current `KeywordRetriever` is deliberately simple. Replace it by adding new retrievers behind the same interface:
+The current `KeywordRetriever` is deliberately simple and remains the local baseline. Extend it by adding retrievers behind the same interface:
 
-- `QdrantRetriever` for semantic retrieval.
-- `Neo4jRetriever` for graph facts and Text-to-Cypher.
-- `HybridRetriever` for fusion and reranking.
+- `GraphRetriever` for the KG teammate's output.
+- `VectorRetriever` or `QdrantRetriever` for semantic retrieval after the local path is stable.
+- `LLMAnswerer` after retrieval can provide reliable cited evidence.
 
 Do not change the frontend contract when swapping retrieval internals.

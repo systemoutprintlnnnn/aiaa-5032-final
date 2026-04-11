@@ -3,26 +3,13 @@ from __future__ import annotations
 import csv
 import json
 import re
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from app.stores import Document, Fact
+
 
 OPEN_SOURCE_LICENSE = "MOF-ChemUnity data: CC BY-NC 4.0; code: MIT"
-
-
-@dataclass(frozen=True)
-class Fact:
-    id: str
-    refcode: str | None
-    material_names: tuple[str, ...]
-    relation: str
-    value: str
-    evidence: str
-    doi: str | None
-    data_source: str
-    path: str
-    search_text: str
 
 
 class KnowledgeStore:
@@ -31,6 +18,7 @@ class KnowledgeStore:
     def __init__(self, data_dir: Path) -> None:
         self.data_dir = data_dir
         self.facts: list[Fact] = []
+        self.documents: list[Document] = []
         self.material_count = 0
         self._load()
 
@@ -222,18 +210,30 @@ class KnowledgeStore:
     ) -> None:
         fact_id = fact_id or f"fact-{len(self.facts)}"
         text = " ".join([refcode or "", *names, relation, value, evidence, doi or ""])
-        self.facts.append(
-            Fact(
-                id=fact_id,
-                refcode=refcode,
-                material_names=names,
-                relation=relation,
-                value=value,
-                evidence=evidence,
-                doi=doi,
-                data_source=data_source,
-                path=path,
-                search_text=normalize_for_search(text),
+        fact = Fact(
+            id=fact_id,
+            refcode=refcode,
+            material_names=names,
+            relation=relation,
+            value=value,
+            evidence=evidence,
+            doi=doi,
+            data_source=data_source,
+            path=path,
+            search_text=normalize_for_search(text),
+        )
+        self.facts.append(fact)
+        self.documents.append(
+            Document(
+                id=f"doc-{fact.id}",
+                text=f"{fact.relation}: {fact.value}. Evidence: {fact.evidence}",
+                refcode=fact.refcode,
+                material_names=fact.material_names,
+                relation=fact.relation,
+                source=fact.data_source,
+                doi=fact.doi,
+                license=OPEN_SOURCE_LICENSE,
+                fact_id=fact.id,
             )
         )
 
@@ -241,6 +241,9 @@ class KnowledgeStore:
         query_text = normalize_for_search(query)
         query_tokens = tokenize(query_text)
         if not query_tokens:
+            return []
+        explicit_identifiers = extract_explicit_identifiers(query)
+        if explicit_identifiers and not self._has_known_identifier(explicit_identifiers):
             return []
 
         scored: list[tuple[Fact, float]] = []
@@ -290,6 +293,20 @@ class KnowledgeStore:
         scored.sort(key=lambda item: item[1], reverse=True)
         return dedupe(scored, limit)
 
+    def _has_known_identifier(self, identifiers: set[str]) -> bool:
+        for fact in self.facts:
+            candidates = [fact.refcode or "", *fact.material_names]
+            for candidate in candidates:
+                normalized_candidate = normalize_for_search(candidate).strip()
+                if not normalized_candidate:
+                    continue
+                for identifier in identifiers:
+                    if identifier == normalized_candidate:
+                        return True
+                    if len(identifier) >= 5 and is_specific_name(identifier) and identifier in normalized_candidate:
+                        return True
+        return False
+
 
 def dedupe(scored: list[tuple[Fact, float]], limit: int) -> list[tuple[Fact, float]]:
     seen: set[tuple[str | None, str, str]] = set()
@@ -329,6 +346,22 @@ def tokenize(text: str) -> list[str]:
         "mof", "material",
     }
     return [token for token in text.split() if len(token) > 1 and token not in stopwords]
+
+
+def extract_explicit_identifiers(raw_query: str) -> set[str]:
+    identifiers: set[str] = set()
+    generic = {"CSD", "MOF", "BET"}
+    for candidate in re.findall(r"[A-Za-z0-9][A-Za-z0-9_()/-]{3,}", raw_query):
+        if candidate.upper() in generic:
+            continue
+        has_digit = any(char.isdigit() for char in candidate)
+        has_structural_marker = any(char in candidate for char in "_-()/")
+        is_refcode_like = candidate.isupper() and len(candidate) >= 5
+        if has_structural_marker or (has_digit and any(char.isalpha() for char in candidate)) or is_refcode_like:
+            normalized = normalize_for_search(candidate).strip()
+            if normalized:
+                identifiers.add(normalized)
+    return identifiers
 
 
 def is_specific_name(name: str) -> bool:

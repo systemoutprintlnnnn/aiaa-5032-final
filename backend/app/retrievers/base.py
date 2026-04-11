@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from app.knowledge_store import Fact
+from app.stores import Fact
 
 
 @dataclass(frozen=True)

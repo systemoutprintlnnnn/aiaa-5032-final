@@ -14,29 +14,30 @@
 - Deterministic evidence-backed answerer.
 - Minimal frontend.
 
-Status: partially implemented.
+Status: implemented as the local baseline path.
 
-## Milestone 2: Cleaner Retrieval
+## Milestone 2: Simple RAG Core Hardening
 
+- Keep runtime facts and document-style evidence visible in the store.
 - Move retrieval behind a formal retriever interface.
 - Keep the keyword/entity retriever as fallback.
+- Add a hybrid retriever that can merge simple RAG and future KG evidence.
 - Add smoke tests for key sample questions.
 
-## Milestone 3: Vector Retrieval
+## Milestone 3: KG Adapter Integration
 
-- Add Qdrant adapter.
-- Add embedding config.
+- Accept the KG teammate's graph facts through `GraphRetriever`.
+- Preserve graph-style paths in `kg_facts`.
+- Keep the simple RAG path working if the graph retriever returns no results.
+
+## Milestone 4: Vector Retrieval
+
+- Add vector retrieval only after the local baseline and KG adapter contract are stable.
 - Keep keyword/entity fallback and compare retrieval output.
-
-## Milestone 4: Graph Retrieval
-
-- Add Neo4j adapter.
-- Add template Cypher for hard facts.
-- Later add constrained Text-to-Cypher.
 
 ## Milestone 5: LLM Answering
 
-- Add LLM adapter only after retrieval is stable.
+- Add LLM adapter only after retrieval is stable and cited evidence is reliable.
 - Enforce evidence-only answer generation.
 - Add citation verification and insufficient-evidence handling.
 

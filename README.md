@@ -1,6 +1,8 @@
 # MOF KG-Enhanced RAG
 
-This repository is currently focused on getting a minimal end-to-end MOF QA flow working.
+This repository is currently focused on getting a complete local MOF QA flow working.
+
+The local baseline is a simple RAG-style system. KG is an adapter layer and is not required for baseline execution.
 
 Project planning docs live in `docs/`, especially `docs/PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/API_CONTRACT.md`.
 
@@ -53,11 +55,17 @@ The page calls:
 http://127.0.0.1:8000/api/query
 ```
 
+## Run Tests
+
+```bash
+PYTHONPATH=backend pytest -q
+```
+
 ## Current Capabilities
 
 - Loads public MOF-ChemUnity sample data.
-- Normalizes materials, names, properties, synthesis facts, and water-stability facts.
-- Supports a simple keyword/entity retriever.
+- Normalizes materials, names, properties, synthesis facts, and water-stability facts into evidence-backed facts and document-style records.
+- Supports a simple keyword/entity retriever and an empty KG adapter slot through a hybrid retriever.
 - Returns deterministic evidence-based answers with:
   - source cards,
   - DOI/refcode metadata,
@@ -65,9 +73,8 @@ http://127.0.0.1:8000/api/query
 
 ## Next Upgrade
 
-After this FastAPI-based MVP works end-to-end:
+After this simple local RAG baseline works end-to-end:
 
-- replace keyword retrieval with Qdrant;
-- replace in-memory graph facts with Neo4j;
-- add Text-to-Cypher for hard facts;
-- add LLM answer generation and citation verification.
+- connect the KG teammate's output through the graph retriever adapter;
+- add vector retrieval only after the local baseline is stable;
+- add LLM answer generation only after retrieval can provide cited evidence reliably.
