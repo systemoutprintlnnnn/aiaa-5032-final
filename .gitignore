@@ -34,6 +34,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Local runtime artifacts
+.worktrees/
 *.log
 *.sqlite
 *.sqlite3
