@@ -38,16 +38,50 @@ FastAPI /api/query
 frontend/index.html
 ```
 
+## API-First Real RAG Path
+
+```text
+KnowledgeStore facts/documents
+        |
+        v
+EvidenceChunk builder
+        |
+        v
+OpenAIEmbeddingProvider
+        |
+        v
+QdrantVectorStore
+        |
+        v
+VectorRetriever
+        |
+        +---- KeywordRetriever fallback
+        |
+        +---- NoResultGraphRetriever KG slot
+        |
+        v
+HybridRetriever
+        |
+        v
+OpenAILLMAnswerer or DeterministicAnswerer
+        |
+        v
+FastAPI /api/query
+```
+
 ## Target Architecture
 
 ```text
 Runtime MOF data
   -> data source adapters
   -> normalized facts and documents
-  -> local simple RAG retriever
+  -> API embedding model
+  -> Qdrant vector store
+  -> VectorRetriever
+  -> local keyword fallback
   -> optional KG GraphRetriever
   -> HybridRetriever
-  -> evidence-constrained answerer
+  -> evidence-constrained LLM answerer
   -> answer + citations + KG fact paths
 ```
 
@@ -60,15 +94,17 @@ Runtime MOF data
 - `app/stores/`: normalized evidence schemas.
 - `app/retrievers/`: replaceable retrieval adapters.
 - `app/answerers/`: answer composition implementations.
+- `app/rag/`: chunk building, embedding provider, and vector store adapters.
+- `app/scripts/`: setup commands such as vector indexing.
 - `app/services/`: orchestration logic.
 - `app/answerer.py`: answer composition from retrieved evidence.
 
 ## Replacement Path
 
-The current `KeywordRetriever` is deliberately simple and remains the local baseline. Extend it by adding retrievers behind the same interface:
+The current `KeywordRetriever` remains an exact-match fallback. Extend or replace the real RAG path behind the same interfaces:
 
 - `GraphRetriever` for the KG teammate's output.
-- `VectorRetriever` or `QdrantRetriever` for semantic retrieval after the local path is stable.
-- `LLMAnswerer` after retrieval can provide reliable cited evidence.
+- `VectorRetriever` backed by Qdrant for semantic retrieval.
+- `OpenAILLMAnswerer` for evidence-grounded answer generation.
 
 Do not change the frontend contract when swapping retrieval internals.

@@ -68,3 +68,8 @@ def infer_mode(matches: list[tuple[Fact, float]]) -> str:
     if "has_name" in relations:
         return "alias_lookup"
     return "keyword_retrieval"
+
+
+class DeterministicAnswerer:
+    def answer(self, query: str, matches: list[tuple[Fact, float]]) -> QueryResponse:
+        return compose_answer(query, matches)

@@ -2,7 +2,7 @@
 
 This repository is currently focused on getting a complete local MOF QA flow working.
 
-The local baseline is a simple RAG-style system. KG is an adapter layer and is not required for baseline execution.
+The default local baseline is a simple RAG-style system. The real RAG path can be enabled with API embeddings, Qdrant, and an LLM. KG is an adapter layer and is not required for baseline execution.
 
 Project planning docs live in `docs/`, especially `docs/PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/API_CONTRACT.md`.
 
@@ -55,6 +55,33 @@ The page calls:
 http://127.0.0.1:8000/api/query
 ```
 
+## Run API-First Real RAG
+
+Start Qdrant:
+
+```bash
+docker run -p 6333:6333 qdrant/qdrant
+```
+
+Configure API-backed retrieval and answering:
+
+```bash
+export RAG_API_KEY=...
+export RAG_RETRIEVAL_MODE=hybrid
+export RAG_ENABLE_LLM=true
+export RAG_VECTOR_STORE_URL=http://127.0.0.1:6333
+export RAG_EMBEDDING_MODEL=text-embedding-3-small
+export RAG_LLM_MODEL=gpt-4.1-mini
+```
+
+Build the vector index:
+
+```bash
+PYTHONPATH=backend python3 -m app.scripts.index_vectors
+```
+
+Then start the backend and frontend using the same commands above.
+
 ## Run Tests
 
 ```bash
@@ -65,16 +92,17 @@ PYTHONPATH=backend pytest -q
 
 - Loads public MOF-ChemUnity sample data.
 - Normalizes materials, names, properties, synthesis facts, and water-stability facts into evidence-backed facts and document-style records.
-- Supports a simple keyword/entity retriever and an empty KG adapter slot through a hybrid retriever.
+- Supports a simple keyword/entity retriever, an API embedding + Qdrant vector retriever, and an empty KG adapter slot through a hybrid retriever.
 - Returns deterministic evidence-based answers with:
   - source cards,
   - DOI/refcode metadata,
   - graph-style fact paths.
+- Can use an API LLM answerer when `RAG_ENABLE_LLM=true`.
 
 ## Next Upgrade
 
-After this simple local RAG baseline works end-to-end:
+After this API-first real RAG path works end-to-end:
 
 - connect the KG teammate's output through the graph retriever adapter;
-- add vector retrieval only after the local baseline is stable;
-- add LLM answer generation only after retrieval can provide cited evidence reliably.
+- add evaluation scripts for keyword vs vector vs KG-enhanced retrieval;
+- tighten citation verification for LLM answers.

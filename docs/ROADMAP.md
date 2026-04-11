@@ -30,15 +30,18 @@ Status: implemented as the local baseline path.
 - Preserve graph-style paths in `kg_facts`.
 - Keep the simple RAG path working if the graph retriever returns no results.
 
-## Milestone 4: Vector Retrieval
+## Milestone 4: API-First Real RAG
 
-- Add vector retrieval only after the local baseline and KG adapter contract are stable.
+- Add API embedding provider.
+- Add Qdrant vector store and explicit indexing script.
+- Add vector retrieval while keeping keyword/entity fallback.
+- Add API LLM answerer with deterministic fallback.
 - Keep keyword/entity fallback and compare retrieval output.
 
-## Milestone 5: LLM Answering
+## Milestone 5: KG And Evaluation
 
-- Add LLM adapter only after retrieval is stable and cited evidence is reliable.
-- Enforce evidence-only answer generation.
+- Connect KG teammate output through `GraphRetriever`.
+- Compare keyword, vector, and graph-enhanced modes.
 - Add citation verification and insufficient-evidence handling.
 
 ## Milestone 6: Evaluation And Demo
