@@ -35,6 +35,18 @@ curl -X POST http://127.0.0.1:8000/api/query \
 
 Open `frontend/index.html` in a browser while the backend is running.
 
+Or serve the static frontend locally:
+
+```bash
+python3 -m http.server 5173 --directory frontend
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5173/
+```
+
 The page calls:
 
 ```text
