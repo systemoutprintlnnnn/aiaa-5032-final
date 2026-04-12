@@ -17,18 +17,19 @@ The current runtime seed data is in `backend/data/open_source/` and comes from `
 
 ## Coding Strategy
 
-The first milestone is end-to-end behavior, not a perfect RAG stack.
+The first milestone was end-to-end behavior, not a perfect RAG stack. That milestone is now implemented.
 
 Build in this order:
 
-1. Deterministic backend API with evidence-backed answers.
-2. Minimal frontend that calls the API and displays answer, sources, and KG-style facts.
-3. Replaceable retrieval interfaces.
-4. Qdrant vector retrieval.
-5. Neo4j/Text-to-Cypher graph retrieval.
-6. LLM generation and citation verification.
+1. Deterministic backend API with evidence-backed answers. Implemented.
+2. Minimal frontend that calls the API and displays answer, sources, and KG-style facts. Implemented.
+3. Replaceable retrieval interfaces. Implemented.
+4. Qdrant vector retrieval. Implemented as an API-first path and smoke-tested with Zhipu embeddings.
+5. LLM generation. Implemented through a Zhipu OpenAI-compatible chat completions adapter.
+6. Neo4j/Text-to-Cypher graph retrieval. Future KG adapter work.
+7. Citation verification and evaluation. Next hardening work.
 
-Do not add Qdrant, Neo4j, or an LLM dependency before the simple local path is stable.
+Do not let Qdrant, KG, or LLM failures break the default keyword/deterministic local path.
 
 ## Architecture Boundaries
 
@@ -71,10 +72,11 @@ python3 -m pip install -r backend/requirements.txt
 uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
 
-Health check:
+Health/status checks:
 
 ```bash
 curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:8000/api/rag/status
 ```
 
 Example query:
@@ -92,3 +94,31 @@ frontend/index.html
 ```
 
 Open it in a browser while the backend is running.
+
+Run Qdrant:
+
+```bash
+docker compose up -d qdrant
+```
+
+Configure API-first real RAG locally:
+
+```bash
+cp .env.example .env
+# Fill RAG_API_KEY in .env. Do not commit .env.
+set -a
+source .env
+set +a
+```
+
+Build the vector index:
+
+```bash
+PYTHONPATH=backend python3 -m app.scripts.index_vectors
+```
+
+Run tests:
+
+```bash
+PYTHONPATH=backend pytest -q
+```

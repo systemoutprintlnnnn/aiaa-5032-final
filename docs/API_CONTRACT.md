@@ -62,6 +62,14 @@ Response:
 }
 ```
 
+Modes currently used:
+
+- `hard_fact_lookup`: deterministic answer from structured property-like evidence.
+- `alias_lookup`: deterministic answer for material aliases/refcodes.
+- `keyword_retrieval`: deterministic fallback answer from retrieved evidence.
+- `hybrid_rag`: LLM answer composed from retrieved evidence.
+- `insufficient_evidence`: no runtime evidence found.
+
 ## `GET /api/rag/status`
 
 Returns runtime RAG configuration status without exposing secrets.
@@ -90,3 +98,5 @@ Response:
 - `kg_facts` must point to a source via `source_id`.
 - `mode` should remain stable enough for frontend filtering and future ablation demos.
 - If evidence is missing, return `mode = "insufficient_evidence"` with empty `sources` and `kg_facts`.
+- `api_key_configured` may be `true`, but the API key itself must never be returned.
+- The response contract must stay stable when swapping keyword, vector, LLM, or KG internals.

@@ -1,8 +1,11 @@
 # MOF KG-Enhanced RAG
 
-This repository is currently focused on getting a complete local MOF QA flow working.
+This repository is currently focused on a local MOF QA system that can run in two modes:
 
-The default local baseline is a simple RAG-style system. The real RAG path can be enabled with Zhipu OpenAI-compatible API embeddings, Qdrant, and a Zhipu LLM. KG is an adapter layer and is not required for baseline execution.
+- default local mode: keyword/entity retrieval with deterministic evidence-backed answers;
+- API-first real RAG mode: Zhipu OpenAI-compatible embeddings, Qdrant vector retrieval, and a Zhipu LLM answerer.
+
+KG is an adapter layer and is not required for baseline execution.
 
 Project planning docs live in `docs/`, especially `docs/PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/API_CONTRACT.md`.
 
@@ -76,6 +79,8 @@ set +a
 
 The example configuration uses Zhipu `embedding-3` for embeddings and `glm-4.6v` for LLM answers through the OpenAI-compatible base URL.
 
+Keep `.env` local. It is ignored by Git and must contain the real API key only on your machine.
+
 Build the vector index:
 
 ```bash
@@ -85,6 +90,14 @@ PYTHONPATH=backend python3 -m app.scripts.index_vectors
 Then start the backend and frontend using the same commands above.
 
 For a fuller local checklist, see `docs/LOCAL_RUNBOOK.md`.
+
+Current verified smoke path:
+
+- Zhipu `embedding-3` returned 2048-dimensional vectors.
+- Qdrant accepted and retrieved a smoke `mof_evidence_smoke` point.
+- Backend returned `mode=hybrid_rag` for the UTSA-67 BET surface area question with Zhipu `glm-4.6v`.
+
+Before treating the vector path as production-ready for the whole seed dataset, build the full `mof_evidence` Qdrant collection with the indexing script.
 
 ## Run Tests
 
@@ -105,8 +118,9 @@ PYTHONPATH=backend pytest -q
 
 ## Next Upgrade
 
-After this API-first real RAG path works end-to-end:
+The next practical upgrades are:
 
-- connect the KG teammate's output through the graph retriever adapter;
-- add evaluation scripts for keyword vs vector vs KG-enhanced retrieval;
-- tighten citation verification for LLM answers.
+- make vector indexing safer to operate with CLI flags such as `--limit`, `--refcode`, `--collection`, and `--reset`;
+- add a small evaluation set for keyword vs hybrid retrieval;
+- tighten citation verification for LLM answers;
+- connect the KG teammate's output through the graph retriever adapter.

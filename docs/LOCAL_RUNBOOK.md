@@ -48,6 +48,8 @@ Build the vector index:
 PYTHONPATH=backend python3 -m app.scripts.index_vectors
 ```
 
+This indexes all normalized evidence chunks into `RAG_QDRANT_COLLECTION`. With the current MOF-ChemUnity seed data this is a real embedding API run, so do it intentionally.
+
 Run the backend:
 
 ```bash
@@ -59,6 +61,26 @@ Use `/api/rag/status` to confirm the active mode without exposing the API key:
 ```bash
 curl http://127.0.0.1:8000/api/rag/status
 ```
+
+Expected real RAG status after sourcing `.env`:
+
+```json
+{
+  "retrieval_mode": "hybrid",
+  "vector_store_enabled": true,
+  "llm_enabled": true,
+  "api_key_configured": true,
+  "api_base_url": "https://open.bigmodel.cn/api/paas/v4/",
+  "embedding_provider": "zhipu",
+  "embedding_model": "embedding-3",
+  "vector_store_url": "http://127.0.0.1:6333",
+  "qdrant_collection": "mof_evidence",
+  "llm_provider": "zhipu",
+  "llm_model": "glm-4.6v"
+}
+```
+
+The manually verified smoke path used `mof_evidence_smoke` with one UTSA-67 BET evidence chunk. The full `mof_evidence` collection should be indexed before using hybrid mode broadly.
 
 ## Frontend
 

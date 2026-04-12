@@ -47,7 +47,7 @@ KnowledgeStore facts/documents
 EvidenceChunk builder
         |
         v
-OpenAIEmbeddingProvider
+Zhipu/OpenAI-compatible OpenAIEmbeddingProvider
         |
         v
 QdrantVectorStore
@@ -63,7 +63,7 @@ VectorRetriever
 HybridRetriever
         |
         v
-OpenAILLMAnswerer or DeterministicAnswerer
+Zhipu/OpenAI-compatible OpenAILLMAnswerer or DeterministicAnswerer
         |
         v
 FastAPI /api/query
@@ -75,13 +75,13 @@ FastAPI /api/query
 Runtime MOF data
   -> data source adapters
   -> normalized facts and documents
-  -> API embedding model
+  -> Zhipu embedding-3 API
   -> Qdrant vector store
   -> VectorRetriever
   -> local keyword fallback
   -> optional KG GraphRetriever
   -> HybridRetriever
-  -> evidence-constrained LLM answerer
+  -> evidence-constrained Zhipu glm-4.6v answerer
   -> answer + citations + KG fact paths
 ```
 
@@ -105,6 +105,14 @@ The current `KeywordRetriever` remains an exact-match fallback. Extend or replac
 
 - `GraphRetriever` for the KG teammate's output.
 - `VectorRetriever` backed by Qdrant for semantic retrieval.
-- `OpenAILLMAnswerer` for evidence-grounded answer generation.
+- `OpenAILLMAnswerer` for evidence-grounded answer generation through OpenAI-compatible chat completions. It currently targets Zhipu `glm-4.6v`.
 
 Do not change the frontend contract when swapping retrieval internals.
+
+## Current Operational Notes
+
+- Default startup uses `RAG_RETRIEVAL_MODE=keyword` and `RAG_ENABLE_LLM=false`, so no API key or Qdrant service is required.
+- API-first real RAG uses local `.env` values. `.env` must stay ignored by Git.
+- Zhipu `embedding-3` uses 2048-dimensional vectors in this project.
+- The manually verified smoke collection is `mof_evidence_smoke`; the full `mof_evidence` collection still needs an intentional full indexing run.
+- `NoResultGraphRetriever` is a placeholder until the KG team provides data.

@@ -1,147 +1,123 @@
-# MOF KG-Enhanced RAG - Corrected End-to-End Plan
+# MOF KG-Enhanced RAG - Current Project Plan
 
-## Key Correction
+## Non-Negotiable Boundary
 
-`References/` is **not** the runtime knowledge base.
+`References/` is design context only. Do not chunk, embed, index, or answer runtime QA from PDFs or PPTX files in that directory.
 
-The files in `References/` are design references: they explain what a good MOF literature assistant should look like, which data sources are valuable, and which architecture patterns are worth borrowing. They should not be chunked into the product QA corpus.
+Runtime QA knowledge must come from compatible runtime data:
 
-Runtime knowledge should come from:
+- open-source MOF data with compatible license;
+- team/project-provided MOF KG or data files;
+- course-provided datasets;
+- later, explicit literature ingestion if it becomes a planned product feature.
 
-- open-source MOF datasets and KG samples, when licenses allow;
-- the project/team KG implementation;
-- any course-provided MOF datasets;
-- later, real literature ingestion or database integration, if time permits.
+The current runtime seed is `AI4ChemS/MOF_ChemUnity` data under `backend/data/open_source/`. Keep license notes visible: code is MIT, data/content is CC BY-NC 4.0.
 
-For the first end-to-end milestone, the runtime knowledge seed data will use public MOF-ChemUnity sample data from `AI4ChemS/MOF_ChemUnity`:
+## Current Product Goal
 
-- code: MIT License;
-- data: CC BY-NC 4.0;
-- useful files: `demo.json`, `MOF_names_and_CSD_codes.csv`, `water_stability_chemunity_v0.1.0.csv`.
+Build a small but working MOF-specific QA system that can run locally and can be extended with KG output later.
 
-`MontageBai/KGFM` is useful as a method reference, but because the repository has no explicit license at the time of inspection, do not directly import its data into this project unless permission/licensing is clarified.
+The project currently supports:
 
-## Product Goal
+- a FastAPI backend;
+- a static browser frontend;
+- evidence-backed answers with sources and graph-style facts;
+- a default keyword/deterministic local path;
+- an API-first real RAG path using Zhipu `embedding-3`, Qdrant, and Zhipu `glm-4.6v`;
+- a replaceable KG adapter slot.
 
-Build a small but working MOF-specific question-answering system with:
-
-- a backend query API;
-- a minimal frontend;
-- runtime MOF knowledge from open/project data, not from the reference PDFs/PPTX;
-- graph-style facts and evidence;
-- a path to replace the local store with Neo4j/Qdrant later.
-
-The immediate priority is to run end-to-end, even if the first retrieval implementation is simple.
-
-## Architecture
+## Current Architecture
 
 ```text
-Open/project MOF data
-  -> seed-data normalizer
-  -> local knowledge store
-        |
-        +--> graph-style facts
-        +--> searchable text records
-
-User question
-  -> query router
-  -> hard-fact lookup
-  -> text retrieval fallback
-  -> answer composer
-  -> citations / evidence / KG facts
-
-Frontend
-  -> POST /api/query
-  -> answer + source cards + graph facts
+MOF-ChemUnity runtime data
+  -> KnowledgeStore
+  -> normalized facts and evidence chunks
+  -> KeywordRetriever fallback
+  -> Qdrant VectorRetriever when enabled
+  -> KG GraphRetriever slot when available
+  -> HybridRetriever
+  -> DeterministicAnswerer or Zhipu-backed OpenAI-compatible LLM answerer
+  -> FastAPI /api/query
+  -> frontend/index.html
 ```
 
-Later upgrade path:
+The default local mode remains intentionally simple and should keep working without API keys, Qdrant, or KG data.
 
-```text
-local knowledge store
-  -> Qdrant for vector retrieval
-  -> Neo4j for KG/Text-to-Cypher
-  -> LLM generation + citation verification
-```
+## Verified State
 
-## What The References Teach Us
+- Default local API answers seeded questions such as UTSA-67 BET surface area.
+- `/api/health` reports the loaded MOF-ChemUnity seed data.
+- `/api/rag/status` reports active retrieval/LLM configuration without exposing the API key.
+- Zhipu `embedding-3` has been smoke-tested and returned 2048-dimensional vectors.
+- Qdrant has been smoke-tested with a one-point `mof_evidence_smoke` collection.
+- Zhipu `glm-4.6v` has been smoke-tested through the OpenAI-compatible chat completions path.
 
-From the PDF/PPTX references, we keep these ideas:
+The full `mof_evidence` vector collection still needs an intentional full indexing run before vector retrieval should be considered ready for the complete seed corpus.
 
-- MOF knowledge should be material-centric: names, CSD ref codes, properties, applications, synthesis, evidence, and publication sources should connect around the material.
-- Hard facts such as surface area, pore volume, gas uptake, and water stability are better represented as structured facts.
-- Soft knowledge such as synthesis rationale, mechanism, and high-level recommendations can use text retrieval.
-- Answers must show sources and evidence.
-- The demo should distinguish property-specific QA from descriptive/synthesis generation.
+## Development Phases
 
-But the references themselves are not the knowledge corpus.
+### Phase 1: Local Baseline
 
-## Immediate End-to-End Milestone
+Status: implemented.
 
-Build a minimal full stack:
+- FastAPI `/api/health` and `/api/query`.
+- MOF-ChemUnity seed data loader.
+- Deterministic evidence-backed answerer.
+- Static frontend.
 
-- `backend/`: FastAPI API.
-- `backend/data/open_source/`: downloaded open-source MOF-ChemUnity sample data.
-- `backend/app/knowledge_store.py`: loads and normalizes the sample data.
-- `backend/app/retrievers/`: keyword/BM25-like fallback retrieval over normalized facts, later replaceable with Qdrant/Neo4j retrievers.
-- `backend/app/services/`: query orchestration.
-- `backend/app/answerer.py`: deterministic evidence-based answer composer first; LLM adapter later.
-- `frontend/`: simple browser UI that calls the backend.
+### Phase 2: Replaceable Retrieval Core
 
-The first version should answer queries like:
+Status: implemented.
 
-- "What is the BET surface area of UTSA-67?"
-- "Is Zn(LTP)2 water stable?"
-- "What synthesis conditions are reported for UTSA-67?"
-- "What names are associated with CSD ref code CUVVOG?"
+- Formal retriever interface.
+- Keyword/entity retriever.
+- Hybrid retriever.
+- Empty KG adapter slot.
+- Tests for seeded sample questions.
 
-## Development Plan
+### Phase 3: API-First Real RAG
 
-### Phase 1: Minimal Backend
+Status: implemented and smoke-tested.
 
-- Add FastAPI skeleton.
-- Add `/api/health`.
-- Add `/api/query`.
-- Load MOF-ChemUnity seed data at startup.
-- Return `answer`, `sources`, `kg_facts`, and `mode`.
+- Evidence chunk builder.
+- Zhipu/OpenAI-compatible embedding provider.
+- Qdrant vector store adapter.
+- Vector retriever.
+- Zhipu/OpenAI-compatible LLM answerer.
+- Local `.env.example`, Qdrant compose service, and runbook.
 
-### Phase 2: Runtime Knowledge Seed Data
+### Phase 4: RAG Operations Hardening
 
-- Normalize `demo.json` into material records.
-- Normalize `water_stability_chemunity_v0.1.0.csv` into water-stability records.
-- Normalize `MOF_names_and_CSD_codes.csv` into alias records.
-- Keep source DOI, CSD ref code, property name, value, units, and evidence/summary.
+Status: next priority.
 
-### Phase 3: Retrieval And Answering
+- Add safe indexing controls such as `--collection`, `--limit`, `--refcode`, `--reset`, and `--dry-run`.
+- Add a repeatable real RAG smoke command that checks `.env`, Qdrant health, collection count, retrieval, and LLM answering.
+- Add clear handling for missing or empty Qdrant collections.
+- Avoid accidental large embedding runs during development.
 
-- Route obvious hard-fact questions to structured lookup:
-  - surface area
-  - pore volume
-  - pore diameter
-  - gas uptake
-  - water stability
-  - synthesis
-  - names / aliases
-- Use keyword retrieval as fallback.
-- Compose answers only from retrieved facts.
-- If no evidence is found, return an insufficient-evidence response.
+### Phase 5: Evaluation
 
-### Phase 4: Frontend
+Status: next priority after indexing hardening.
 
-- Add a minimal query page.
-- Show the answer, sources, and graph-style facts.
-- Keep it simple enough to debug quickly.
+- Build a small demo/evaluation question set covering:
+  - BET surface area;
+  - water stability;
+  - aliases/refcodes;
+  - synthesis conditions;
+  - application facts;
+  - insufficient-evidence behavior.
+- Compare default keyword mode against hybrid vector mode.
+- Track retrieved fact IDs, source coverage, and answer mode.
 
-### Phase 5: Upgrade Path
+### Phase 6: KG Adapter Integration
 
-After end-to-end works:
+Status: pending external KG output.
 
-- replace keyword search with Qdrant embeddings;
-- replace in-memory graph facts with Neo4j;
-- add Text-to-Cypher for hard facts;
-- add LLM generation and citation verification;
-- add ablation modes for final presentation.
+- Define a graph fact import format.
+- Implement a real `GraphRetriever` behind the existing retriever interface.
+- Preserve the existing API response contract.
+- Keep KG as an additive layer, not a blocker for local RAG.
 
-## Current Priority
+## Immediate Priority
 
-Run the smallest credible system end-to-end before adding sophisticated RAG or KG infrastructure.
+The next implementation slice should be indexing and verification tooling for the real RAG path. This turns the current manual smoke test into a repeatable command before the project spends more effort on KG or broader UI work.

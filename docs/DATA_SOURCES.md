@@ -25,6 +25,17 @@ License notes from upstream:
 - code: MIT License;
 - non-code data/content: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0).
 
+## Derived Runtime Indexes
+
+Qdrant collections are derived runtime indexes over normalized MOF-ChemUnity facts. They must be built from `backend/data/open_source/` or another approved runtime source, not from `References/`.
+
+Current collection names:
+
+- `mof_evidence`: intended full evidence index for the seed corpus.
+- `mof_evidence_smoke`: small local smoke-test collection used to verify Zhipu embeddings and Qdrant retrieval.
+
+Do not commit generated vector stores, Qdrant storage, caches, or local `.env` files.
+
 ## Reference-Only Repositories
 
 `MontageBai/KGFM` is useful as a method reference. It does not currently expose an explicit license, so do not import its data or code into this repository unless licensing is clarified.
