@@ -74,12 +74,13 @@ Response:
   "vector_store_enabled": false,
   "llm_enabled": false,
   "api_key_configured": false,
-  "embedding_provider": "openai",
-  "embedding_model": "text-embedding-3-small",
+  "api_base_url": "https://open.bigmodel.cn/api/paas/v4/",
+  "embedding_provider": "zhipu",
+  "embedding_model": "embedding-3",
   "vector_store_url": "http://127.0.0.1:6333",
   "qdrant_collection": "mof_evidence",
-  "llm_provider": "openai",
-  "llm_model": "gpt-4.1-mini"
+  "llm_provider": "zhipu",
+  "llm_model": "glm-4.6v"
 }
 ```
 

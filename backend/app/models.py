@@ -46,6 +46,7 @@ class RAGStatusResponse(BaseModel):
     vector_store_enabled: bool
     llm_enabled: bool
     api_key_configured: bool
+    api_base_url: str
     embedding_provider: str
     embedding_model: str
     vector_store_url: str

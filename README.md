@@ -2,7 +2,7 @@
 
 This repository is currently focused on getting a complete local MOF QA flow working.
 
-The default local baseline is a simple RAG-style system. The real RAG path can be enabled with API embeddings, Qdrant, and an LLM. KG is an adapter layer and is not required for baseline execution.
+The default local baseline is a simple RAG-style system. The real RAG path can be enabled with Zhipu OpenAI-compatible API embeddings, Qdrant, and a Zhipu LLM. KG is an adapter layer and is not required for baseline execution.
 
 Project planning docs live in `docs/`, especially `docs/PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/API_CONTRACT.md`.
 
@@ -74,6 +74,8 @@ source .env
 set +a
 ```
 
+The example configuration uses Zhipu `embedding-3` for embeddings and `glm-4.6v` for LLM answers through the OpenAI-compatible base URL.
+
 Build the vector index:
 
 ```bash
@@ -94,7 +96,7 @@ PYTHONPATH=backend pytest -q
 
 - Loads public MOF-ChemUnity sample data.
 - Normalizes materials, names, properties, synthesis facts, and water-stability facts into evidence-backed facts and document-style records.
-- Supports a simple keyword/entity retriever, an API embedding + Qdrant vector retriever, and an empty KG adapter slot through a hybrid retriever.
+- Supports a simple keyword/entity retriever, a Zhipu API embedding + Qdrant vector retriever, and an empty KG adapter slot through a hybrid retriever.
 - Returns deterministic evidence-based answers with:
   - source cards,
   - DOI/refcode metadata,

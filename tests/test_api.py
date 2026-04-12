@@ -27,6 +27,11 @@ def test_rag_status_endpoint_reports_default_runtime_mode_without_secret():
     assert data["api_key_configured"] is False
     assert "api_key" not in data
     assert data["qdrant_collection"] == "mof_evidence"
+    assert data["api_base_url"] == "https://open.bigmodel.cn/api/paas/v4/"
+    assert data["embedding_provider"] == "zhipu"
+    assert data["embedding_model"] == "embedding-3"
+    assert data["llm_provider"] == "zhipu"
+    assert data["llm_model"] == "glm-4.6v"
 
 
 def test_query_endpoint_returns_sources_and_fact_paths():

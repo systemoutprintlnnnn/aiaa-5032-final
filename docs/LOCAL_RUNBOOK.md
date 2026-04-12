@@ -32,7 +32,7 @@ Start Qdrant:
 docker compose up -d qdrant
 ```
 
-Configure the API-backed RAG path:
+Configure the API-backed RAG path. The example file uses Zhipu `embedding-3`, `glm-4.6v`, and the OpenAI-compatible base URL `https://open.bigmodel.cn/api/paas/v4/`.
 
 ```bash
 cp .env.example .env

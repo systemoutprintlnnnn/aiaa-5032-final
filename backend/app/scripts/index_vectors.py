@@ -12,7 +12,12 @@ def main() -> None:
     api_key = settings.require_api_key("vector indexing")
     store = KnowledgeStore(settings.open_source_data_dir)
     chunks = build_evidence_chunks(store)
-    embedding_provider = OpenAIEmbeddingProvider(model=settings.rag_embedding_model, api_key=api_key)
+    embedding_provider = OpenAIEmbeddingProvider(
+        model=settings.rag_embedding_model,
+        api_key=api_key,
+        base_url=settings.rag_api_base_url,
+        dimensions=settings.rag_embedding_dimensions,
+    )
     vector_store = QdrantVectorStore(
         url=settings.rag_vector_store_url,
         collection=settings.rag_qdrant_collection,

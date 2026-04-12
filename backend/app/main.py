@@ -20,7 +20,12 @@ retrievers = []
 
 if settings.rag_retrieval_mode in {"vector", "hybrid"}:
     api_key = settings.require_api_key("vector retrieval")
-    embedding_provider = OpenAIEmbeddingProvider(model=settings.rag_embedding_model, api_key=api_key)
+    embedding_provider = OpenAIEmbeddingProvider(
+        model=settings.rag_embedding_model,
+        api_key=api_key,
+        base_url=settings.rag_api_base_url,
+        dimensions=settings.rag_embedding_dimensions,
+    )
     vector_store = QdrantVectorStore(
         url=settings.rag_vector_store_url,
         collection=settings.rag_qdrant_collection,
@@ -37,7 +42,7 @@ retriever = HybridRetriever(retrievers)
 answerer = DeterministicAnswerer()
 if settings.rag_enable_llm:
     api_key = settings.require_api_key("LLM answering")
-    answerer = OpenAILLMAnswerer(model=settings.rag_llm_model, api_key=api_key)
+    answerer = OpenAILLMAnswerer(model=settings.rag_llm_model, api_key=api_key, base_url=settings.rag_api_base_url)
 
 query_service = QueryService(retriever, answerer=answerer)
 
@@ -69,6 +74,7 @@ def rag_status() -> RAGStatusResponse:
         vector_store_enabled=settings.rag_retrieval_mode in {"vector", "hybrid"},
         llm_enabled=settings.rag_enable_llm,
         api_key_configured=bool(settings.rag_api_key),
+        api_base_url=settings.rag_api_base_url,
         embedding_provider=settings.rag_embedding_provider,
         embedding_model=settings.rag_embedding_model,
         vector_store_url=settings.rag_vector_store_url,
