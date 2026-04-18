@@ -17,6 +17,7 @@ Status: implemented.
 - Runtime seed data loader.
 - Deterministic evidence-backed answerer.
 - Minimal frontend.
+- Next.js + TypeScript frontend polish.
 
 ## Milestone 2: Simple RAG Core Hardening
 
@@ -69,8 +70,10 @@ Status: pending KG output.
 
 ## Milestone 7: Demo Polish
 
-Status: planned.
+Status: started.
 
 - Prepare demo examples for property QA and synthesis/descriptive QA.
 - Add a concise project walkthrough.
 - Keep frontend contract stable while improving presentation.
+- Keep the local workbench focused on query, answer, sources, and KG-style
+  facts.

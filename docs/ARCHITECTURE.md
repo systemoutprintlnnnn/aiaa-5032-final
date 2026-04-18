@@ -35,7 +35,7 @@ QueryService
 FastAPI /api/query
         |
         v
-frontend/index.html
+frontend Next.js TypeScript workbench
 ```
 
 ## API-First Real RAG Path
@@ -107,7 +107,10 @@ The current `KeywordRetriever` remains an exact-match fallback. Extend or replac
 - `VectorRetriever` backed by Qdrant for semantic retrieval.
 - `OpenAILLMAnswerer` for evidence-grounded answer generation through OpenAI-compatible chat completions. It currently targets Zhipu `glm-4.6v`.
 
-Do not change the frontend contract when swapping retrieval internals.
+Do not change the frontend contract when swapping retrieval internals. The
+frontend API client lives under `frontend/lib/` and expects the same
+`/api/query` and `/api/rag/status` response shapes documented in
+`docs/API_CONTRACT.md`.
 
 ## Current Operational Notes
 

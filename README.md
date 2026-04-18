@@ -39,12 +39,13 @@ curl -X POST http://127.0.0.1:8000/api/query \
 
 ## Run Frontend
 
-Open `frontend/index.html` in a browser while the backend is running.
-
-Or serve the static frontend locally:
+The frontend is a Next.js + TypeScript app. Start it while the backend is
+running:
 
 ```bash
-python3 -m http.server 5173 --directory frontend
+cd frontend
+npm install
+npm run dev
 ```
 
 Then open:
@@ -53,10 +54,16 @@ Then open:
 http://127.0.0.1:5173/
 ```
 
-The page calls:
+The app calls:
 
 ```text
 http://127.0.0.1:8000/api/query
+```
+
+To point the frontend at a different backend URL, set:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 npm run dev
 ```
 
 ## Run API-First Real RAG
@@ -103,6 +110,7 @@ Before treating the vector path as production-ready for the whole seed dataset, 
 
 ```bash
 PYTHONPATH=backend pytest -q
+cd frontend && npm test && npm run typecheck && npm run build
 ```
 
 ## Current Capabilities
@@ -115,6 +123,8 @@ PYTHONPATH=backend pytest -q
   - DOI/refcode metadata,
   - graph-style fact paths.
 - Can use an API LLM answerer when `RAG_ENABLE_LLM=true`.
+- Provides a Next.js + TypeScript local workbench for querying FastAPI and
+  reviewing answer evidence.
 
 ## Next Upgrade
 

@@ -87,13 +87,17 @@ curl -X POST http://127.0.0.1:8000/api/query \
   -d '{"question":"What is the BET surface area of UTSA-67?","top_k":3}'
 ```
 
-Static frontend:
+Frontend:
 
-```text
-frontend/index.html
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-Open it in a browser while the backend is running.
+Open `http://127.0.0.1:5173/` while the backend is running. The frontend is a
+Next.js + TypeScript app and calls `NEXT_PUBLIC_API_BASE_URL` when provided,
+otherwise `http://127.0.0.1:8000`.
 
 Run Qdrant:
 
@@ -121,4 +125,5 @@ Run tests:
 
 ```bash
 PYTHONPATH=backend pytest -q
+cd frontend && npm test && npm run typecheck && npm run build
 ```

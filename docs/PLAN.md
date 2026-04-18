@@ -20,7 +20,7 @@ Build a small but working MOF-specific QA system that can run locally and can be
 The project currently supports:
 
 - a FastAPI backend;
-- a static browser frontend;
+- a Next.js + TypeScript browser frontend;
 - evidence-backed answers with sources and graph-style facts;
 - a default keyword/deterministic local path;
 - an API-first real RAG path using Zhipu `embedding-3`, Qdrant, and Zhipu `glm-4.6v`;
@@ -38,7 +38,7 @@ MOF-ChemUnity runtime data
   -> HybridRetriever
   -> DeterministicAnswerer or Zhipu-backed OpenAI-compatible LLM answerer
   -> FastAPI /api/query
-  -> frontend/index.html
+  -> frontend Next.js workbench
 ```
 
 The default local mode remains intentionally simple and should keep working without API keys, Qdrant, or KG data.
@@ -63,7 +63,7 @@ Status: implemented.
 - FastAPI `/api/health` and `/api/query`.
 - MOF-ChemUnity seed data loader.
 - Deterministic evidence-backed answerer.
-- Static frontend.
+- Next.js + TypeScript frontend workbench.
 
 ### Phase 2: Replaceable Retrieval Core
 

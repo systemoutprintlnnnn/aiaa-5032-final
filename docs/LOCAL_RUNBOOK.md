@@ -84,10 +84,28 @@ The manually verified smoke path used `mof_evidence_smoke` with one UTSA-67 BET 
 
 ## Frontend
 
-Open `frontend/index.html` while the backend is running, or serve it locally:
+The frontend is a Next.js + TypeScript app. Run it while the backend is
+available on `http://127.0.0.1:8000`:
 
 ```bash
-python3 -m http.server 5173 --directory frontend
+cd frontend
+npm install
+npm run dev
 ```
 
 Then open `http://127.0.0.1:5173/`.
+
+Use `NEXT_PUBLIC_API_BASE_URL` only if the backend is running somewhere else:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000 npm run dev
+```
+
+Frontend verification:
+
+```bash
+cd frontend
+npm test
+npm run typecheck
+npm run build
+```
