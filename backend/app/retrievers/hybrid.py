@@ -25,13 +25,18 @@ class HybridRetriever:
 
         merged.sort(key=lambda item: item.score, reverse=True)
 
+        seed_identifiers = extract_explicit_identifiers(query)
         if _is_shared_neighbor_query(query):
-            seed_identifiers = extract_explicit_identifiers(query)
             if seed_identifiers:
                 merged = [result for result in merged if not _fact_matches_identifier(result.fact, seed_identifiers)]
             kg_results = [result for result in merged if result.fact.data_source == "MOF KG JSON"]
             if kg_results:
                 merged = kg_results
+        else:
+            if seed_identifiers:
+                merged = [result for result in merged if _fact_matches_identifier(result.fact, seed_identifiers)]
+            if _is_synthesis_evidence_query(query):
+                merged.sort(key=lambda item: (_synthesis_priority(item.fact), _synthesis_completeness(item.fact), item.score), reverse=True)
 
         return merged[:limit]
 
@@ -61,6 +66,61 @@ def _is_shared_neighbor_query(query: str) -> bool:
         " other " in query_text
         and any(term in query_text for term in material_terms)
         and any(term in query_text for term in relation_terms)
+    )
+
+
+def _is_synthesis_evidence_query(query: str) -> bool:
+    query_text = f" {normalize_for_search(query).strip()} "
+    terms = [
+        " synthesis ",
+        " synthesize ",
+        " synthesized ",
+        " solvent ",
+        " precursor ",
+        " temperature ",
+        " reaction time ",
+        " procedure ",
+        " yield ",
+        " method ",
+        " linker ",
+        " ligand ",
+    ]
+    return any(term in query_text for term in terms)
+
+
+def _synthesis_priority(fact: Fact) -> int:
+    if fact.relation == "HAS_SYNTHESIS_EVIDENCE":
+        return 2
+    if fact.data_source == "MOF KG JSON" and fact.relation in {
+        "KG_USES_METHOD",
+        "KG_USES_METAL_PRECURSOR",
+        "KG_USES_ORGANIC_PRECURSOR",
+        "KG_USES_SOLVENT",
+        "KG_CITED_IN",
+    }:
+        return 1
+    return 0
+
+
+def _synthesis_completeness(fact: Fact) -> int:
+    if fact.relation != "HAS_SYNTHESIS_EVIDENCE":
+        return 0
+    text = normalize_for_search(f"{fact.value} {fact.evidence}")
+    return sum(
+        1
+        for term in [
+            "method",
+            "metal precursor",
+            "organic precursor",
+            "linker",
+            "solvent",
+            "temperature",
+            "reaction time",
+            "operation",
+            "yield",
+            "doi",
+        ]
+        if term in text
     )
 
 

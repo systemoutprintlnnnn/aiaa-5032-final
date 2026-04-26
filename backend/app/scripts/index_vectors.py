@@ -9,8 +9,9 @@ from app.rag.chunks import EvidenceChunk, build_evidence_chunks
 from app.rag.embeddings import OpenAIEmbeddingProvider
 from app.rag.vector_store import QdrantVectorStore
 
-# Zhipu embedding-3 max input length (chars). Truncate longer texts.
-MAX_TEXT_LENGTH = 8000
+# Keep a conservative per-chunk character limit for Zhipu embedding-3.
+# Some chemistry-heavy records below 8000 chars still exceed the API's request limits.
+MAX_TEXT_LENGTH = 4000
 
 
 def _truncate(chunk: EvidenceChunk) -> EvidenceChunk:
@@ -26,7 +27,7 @@ def _truncate(chunk: EvidenceChunk) -> EvidenceChunk:
 def main() -> None:
     settings = get_settings()
     api_key = settings.require_api_key("vector indexing")
-    store = KnowledgeStore(settings.open_source_data_dir)
+    store = KnowledgeStore(settings.open_source_data_dir, synthesis_data_path=settings.resolved_kg_synthesis_path)
     raw_chunks = build_evidence_chunks(store)
     chunks = [_truncate(c) for c in raw_chunks]
 

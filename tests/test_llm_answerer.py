@@ -1,4 +1,5 @@
-from app.answerers.llm import OpenAILLMAnswerer
+from app.answerers.llm import OpenAILLMAnswerer, _format_evidence
+from app.stores import Fact
 
 
 class FakeResponse:
@@ -45,7 +46,8 @@ def test_llm_answerer_uses_evidence_when_matches_exist():
     from app.config import get_settings
     from app.knowledge_store import KnowledgeStore
 
-    store = KnowledgeStore(get_settings().open_source_data_dir)
+    settings = get_settings()
+    store = KnowledgeStore(settings.open_source_data_dir, synthesis_data_path=settings.resolved_kg_synthesis_path)
     fact = store.search("What is the BET surface area of UTSA-67?", limit=1)[0][0]
     client = FakeClient()
     answerer = OpenAILLMAnswerer(model="fake-model", api_key="test-key", client=client)
@@ -58,3 +60,25 @@ def test_llm_answerer_uses_evidence_when_matches_exist():
     assert client.chat.completions.last_request["model"] == "fake-model"
     assert client.chat.completions.last_request["messages"][0]["role"] == "system"
     assert client.chat.completions.last_request["messages"][1]["role"] == "user"
+
+
+def test_llm_evidence_format_includes_source_doi_and_path():
+    fact = Fact(
+        id="synthesis-YEXLAR-0",
+        refcode="YEXLAR",
+        material_names=("{[(CH3)2NH2][Zn(FDA)(BTZ)2]}n",),
+        relation="HAS_SYNTHESIS_EVIDENCE",
+        value="method: Conventional solvothermal",
+        evidence="Operation: heat at 160 °C for 3 days. DOI: 10.1021/acs.cgd.8b00344. Source: KAIST.",
+        doi="10.1021/acs.cgd.8b00344",
+        data_source="MOF KG synthesis evidence",
+        path="Material(YEXLAR) -> HAS_SYNTHESIS_EVIDENCE -> SynthesisRecord:36",
+        search_text="yexlar synthesis",
+    )
+
+    evidence = _format_evidence([(fact, 10.0)])
+
+    assert "source=MOF KG synthesis evidence" in evidence
+    assert "doi=10.1021/acs.cgd.8b00344" in evidence
+    assert "path=Material(YEXLAR) -> HAS_SYNTHESIS_EVIDENCE -> SynthesisRecord:36" in evidence
+    assert "Operation: heat at 160 °C for 3 days" in evidence

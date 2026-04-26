@@ -19,7 +19,7 @@ from app.services import QueryService
 
 
 settings = get_settings()
-store = KnowledgeStore(settings.open_source_data_dir)
+store = KnowledgeStore(settings.open_source_data_dir, synthesis_data_path=settings.resolved_kg_synthesis_path)
 retrievers = []
 
 if settings.rag_retrieval_mode in {"vector", "hybrid"}:

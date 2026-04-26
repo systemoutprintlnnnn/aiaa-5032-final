@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from app.knowledge_store import KnowledgeStore, OPEN_SOURCE_LICENSE
+from app.knowledge_store import KnowledgeStore
 
 
 @dataclass(frozen=True)
@@ -15,25 +15,25 @@ class EvidenceChunk:
 
 def build_evidence_chunks(store: KnowledgeStore) -> list[EvidenceChunk]:
     chunks: list[EvidenceChunk] = []
-    for fact in store.facts:
-        subject = fact.refcode or (fact.material_names[0] if fact.material_names else "material")
-        text = f"{subject}. {fact.relation}: {fact.value}. Evidence: {fact.evidence}"
+    fact_by_id = {fact.id: fact for fact in store.facts}
+    for document in store.documents:
+        fact = fact_by_id.get(document.fact_id)
         chunks.append(
             EvidenceChunk(
-                id=fact.id,
-                text=text,
+                id=document.id,
+                text=document.text,
                 payload={
-                    "fact_id": fact.id,
-                    "refcode": fact.refcode,
-                    "material_names": list(fact.material_names),
-                    "relation": fact.relation,
-                    "value": fact.value,
-                    "evidence": fact.evidence,
-                    "doi": fact.doi,
-                    "source": fact.data_source,
-                    "license": OPEN_SOURCE_LICENSE,
-                    "path": fact.path,
-                    "text": text,
+                    "fact_id": document.fact_id,
+                    "refcode": document.refcode,
+                    "material_names": list(document.material_names),
+                    "relation": document.relation,
+                    "value": fact.value if fact else "",
+                    "evidence": fact.evidence if fact else "",
+                    "doi": document.doi,
+                    "source": document.source,
+                    "license": document.license,
+                    "path": fact.path if fact else "",
+                    "text": document.text,
                 },
             )
         )

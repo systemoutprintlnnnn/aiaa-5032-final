@@ -13,13 +13,23 @@ SYSTEM_PROMPT = (
     "Answer using only the evidence provided. Cite source ids like [S1]. "
     "If the evidence is insufficient, say that the current runtime knowledge store does not contain enough evidence."
 )
+MAX_EVIDENCE_TEXT_LENGTH = 1800
 
 
 def _format_evidence(matches: list[tuple[Fact, float]]) -> str:
     return "\n".join(
-        f"[S{idx}] {fact.refcode or 'material'} | {fact.relation} | {fact.value} | {fact.evidence}"
+        (
+            f"[S{idx}] refcode={fact.refcode or 'material'} | relation={fact.relation} | value={_truncate(fact.value)} | "
+            f"source={fact.data_source} | doi={fact.doi or 'none'} | path={fact.path} | evidence={_truncate(fact.evidence)}"
+        )
         for idx, (fact, _score) in enumerate(matches, start=1)
     )
+
+
+def _truncate(text: str) -> str:
+    if len(text) <= MAX_EVIDENCE_TEXT_LENGTH:
+        return text
+    return text[: MAX_EVIDENCE_TEXT_LENGTH - 3].rstrip() + "..."
 
 
 class OpenAILLMAnswerer:

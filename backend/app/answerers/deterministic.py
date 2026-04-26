@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.knowledge_store import OPEN_SOURCE_LICENSE
+from app.knowledge_store import KG_RUNTIME_LICENSE_NOTICE, KG_SYNTHESIS_DATA_SOURCE, OPEN_SOURCE_LICENSE
 from app.models import KGFact, QueryResponse, Source
 from app.stores import Fact
 
@@ -80,4 +80,6 @@ class DeterministicAnswerer:
 def source_license(fact: Fact) -> str:
     if fact.data_source == "MOF KG JSON":
         return KG_LICENSE_NOTICE
+    if fact.data_source == KG_SYNTHESIS_DATA_SOURCE:
+        return KG_RUNTIME_LICENSE_NOTICE
     return OPEN_SOURCE_LICENSE

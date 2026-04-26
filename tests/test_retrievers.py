@@ -31,6 +31,56 @@ def test_hybrid_retriever_keeps_shared_neighbor_queries_focused_on_kg_results():
     assert [result.fact.refcode for result in results] == ["RAPXIR"]
 
 
+def test_hybrid_retriever_prioritizes_synthesis_documents_for_synthesis_intent():
+    synthesis = make_fact("YEXLAR", "MOF KG synthesis evidence", "HAS_SYNTHESIS_EVIDENCE", "method: Conventional solvothermal")
+    kg_solvent = make_fact("YEXLAR", "MOF KG JSON", "KG_USES_SOLVENT", "DMF")
+    retriever = HybridRetriever(
+        [
+            StaticRetriever([RetrievalResult(fact=kg_solvent, score=80.0)]),
+            StaticRetriever([RetrievalResult(fact=synthesis, score=60.0)]),
+        ]
+    )
+
+    results = retriever.search("What synthesis evidence is available for YEXLAR?", limit=2)
+
+    assert [result.fact.relation for result in results] == ["HAS_SYNTHESIS_EVIDENCE", "KG_USES_SOLVENT"]
+
+
+def test_hybrid_retriever_filters_vector_noise_for_explicit_entity_queries():
+    seed = make_fact("RAPXEN", "MOF KG synthesis evidence", "HAS_SYNTHESIS_EVIDENCE", "solvent: CH3OH")
+    neighbor = make_fact("RAPXIR", "MOF KG synthesis evidence", "HAS_SYNTHESIS_EVIDENCE", "solvent: CH3OH")
+    retriever = HybridRetriever(
+        [
+            StaticRetriever([RetrievalResult(fact=neighbor, score=99.0)]),
+            StaticRetriever([RetrievalResult(fact=seed, score=40.0)]),
+        ]
+    )
+
+    results = retriever.search("What solvent is used in RAPXEN?", limit=5)
+
+    assert [result.fact.refcode for result in results] == ["RAPXEN"]
+
+
+def test_hybrid_retriever_prioritizes_complete_synthesis_evidence():
+    variant = make_fact("YEXLAR", "MOF KG synthesis evidence", "HAS_SYNTHESIS_EVIDENCE", "metal precursor: Cu(NO3)2")
+    complete = make_fact(
+        "YEXLAR",
+        "MOF KG synthesis evidence",
+        "HAS_SYNTHESIS_EVIDENCE",
+        "method: Conventional solvothermal; solvent: DMF; temperature: 433.15 K; reaction time: 72.0 h; operation: heat; yield: 58 %",
+    )
+    retriever = HybridRetriever(
+        [
+            StaticRetriever([RetrievalResult(fact=variant, score=90.0)]),
+            StaticRetriever([RetrievalResult(fact=complete, score=50.0)]),
+        ]
+    )
+
+    results = retriever.search("What synthesis evidence is available for YEXLAR?", limit=2)
+
+    assert results[0].fact.value.startswith("method: Conventional solvothermal")
+
+
 class StaticRetriever:
     def __init__(self, results: list[RetrievalResult]) -> None:
         self.results = results

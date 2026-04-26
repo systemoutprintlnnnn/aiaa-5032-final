@@ -44,14 +44,29 @@ Runtime export:
 
 - `backend/data/kg/mof_kg.json`
 
+Runtime synthesis evidence:
+
+- `reference_code/MOF_KG/3.MOF-Synthesis.json`
+
 Builder inputs:
 
 - `reference_code/MOF_KG/1.water_stability_chemunity_v0.1.0.csv`
 - `reference_code/MOF_KG/2.MOF_names_and_CSD_codes.csv`
 - `reference_code/MOF_KG/3.MOF-Synthesis.json`
 
+The synthesis JSON is loaded as row-level evidence documents in addition to
+being used by the offline builder. Each row remains an independent runtime
+evidence record so variants that share a CSD identifier are not silently merged.
+
 No explicit public license was supplied with the KG package. Treat it as
 project/course runtime data unless licensing is clarified.
+
+## Benchmark Files
+
+The files under the externally provided `tests/` package, such as
+`MOF_synthesis_benchmark.xlsx`, `matching_benchmark.csv`, and
+`water_stability_Ansari_benchmark_results.csv`, are useful for evaluation and
+demo question selection. They are not loaded as the default runtime QA corpus.
 
 ## Reference-Only Repositories
 

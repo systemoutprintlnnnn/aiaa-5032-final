@@ -27,6 +27,7 @@ class Settings(BaseModel):
     rag_llm_model: str = "glm-4.6v"
     kg_enabled: bool = True
     kg_graph_path: Path | None = None
+    kg_synthesis_path: Path | None = None
 
     @property
     def open_source_data_dir(self) -> Path:
@@ -39,6 +40,14 @@ class Settings(BaseModel):
         if self.kg_graph_path.is_absolute():
             return self.kg_graph_path
         return self.backend_dir.parent / self.kg_graph_path
+
+    @property
+    def resolved_kg_synthesis_path(self) -> Path:
+        if self.kg_synthesis_path is None:
+            return self.backend_dir.parent / "reference_code" / "MOF_KG" / "3.MOF-Synthesis.json"
+        if self.kg_synthesis_path.is_absolute():
+            return self.kg_synthesis_path
+        return self.backend_dir.parent / self.kg_synthesis_path
 
     def require_api_key(self, feature: str) -> str:
         from app.rag.embeddings import RAGConfigurationError
@@ -64,6 +73,7 @@ class Settings(BaseModel):
             rag_llm_model=os.getenv("RAG_LLM_MODEL", "glm-4.6v"),
             kg_enabled=parse_bool(os.getenv("KG_ENABLED", "true")),
             kg_graph_path=Path(os.getenv("KG_GRAPH_PATH")) if os.getenv("KG_GRAPH_PATH") else None,
+            kg_synthesis_path=Path(os.getenv("KG_SYNTHESIS_PATH")) if os.getenv("KG_SYNTHESIS_PATH") else None,
         )
 
 
