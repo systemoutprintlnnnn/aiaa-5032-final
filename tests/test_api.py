@@ -48,6 +48,8 @@ def test_query_endpoint_returns_sources_and_fact_paths():
     data = response.json()
     assert data["mode"] == "hard_fact_lookup"
     assert data["sources"]
+    assert data["sources"][0]["retrieval_sources"]
+    assert "keyword" in data["sources"][0]["retrieval_sources"]
     assert data["kg_facts"]
     assert "1137" in data["answer"]
 
@@ -88,6 +90,7 @@ def test_query_endpoint_supports_kg_solvent_question():
     data = response.json()
     assert data["sources"]
     assert any(source["data_source"] == "MOF KG JSON" for source in data["sources"])
+    assert any("kg" in source["retrieval_sources"] for source in data["sources"])
     assert any(fact["relation"] == "KG_USES_SOLVENT" for fact in data["kg_facts"])
 
 

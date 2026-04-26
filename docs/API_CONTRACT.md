@@ -47,6 +47,7 @@ Response:
       "refcode": "CUVVOG",
       "evidence": "...",
       "data_source": "MOF-ChemUnity demo.json",
+      "retrieval_sources": ["embedding", "keyword"],
       "license": "MOF-ChemUnity data: CC BY-NC 4.0; code: MIT"
     }
   ],
@@ -99,6 +100,7 @@ Response:
 ## Contract Rules
 
 - `sources` must contain the evidence used by the answer.
+- `sources[].retrieval_sources` reports how the evidence was retrieved. Current values are `kg`, `embedding`, and `keyword`.
 - `kg_facts` must point to a source via `source_id`.
 - `mode` should remain stable enough for frontend filtering and future ablation demos.
 - If evidence is missing, return `mode = "insufficient_evidence"` with empty `sources` and `kg_facts`.

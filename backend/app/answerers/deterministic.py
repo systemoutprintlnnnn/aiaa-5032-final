@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from app.knowledge_store import KG_RUNTIME_LICENSE_NOTICE, KG_SYNTHESIS_DATA_SOURCE, OPEN_SOURCE_LICENSE
 from app.models import KGFact, QueryResponse, Source
+from app.retrievers.base import RetrievalMatch, normalize_retrieval_results
 from app.stores import Fact
 
 KG_LICENSE_NOTICE = "Team/course-provided MOF KG data; no explicit public license supplied."
 
 
-def compose_answer(query: str, matches: list[tuple[Fact, float]]) -> QueryResponse:
-    if not matches:
+def compose_answer(query: str, matches: list[RetrievalMatch]) -> QueryResponse:
+    results = normalize_retrieval_results(matches)
+    if not results:
         return QueryResponse(
             query=query,
             mode="insufficient_evidence",
@@ -25,7 +27,8 @@ def compose_answer(query: str, matches: list[tuple[Fact, float]]) -> QueryRespon
     kg_facts: list[KGFact] = []
     lines: list[str] = []
 
-    for idx, (fact, _score) in enumerate(matches, start=1):
+    for idx, result in enumerate(results, start=1):
+        fact = result.fact
         source_id = f"S{idx}"
         subject = fact.refcode or (fact.material_names[0] if fact.material_names else "material")
         lines.append(f"[{source_id}] {subject}: {fact.relation} = {fact.value}. Evidence: {fact.evidence}")
@@ -37,6 +40,7 @@ def compose_answer(query: str, matches: list[tuple[Fact, float]]) -> QueryRespon
                 refcode=fact.refcode,
                 evidence=fact.evidence,
                 data_source=fact.data_source,
+                retrieval_sources=list(result.retrieval_sources),
                 license=source_license(fact),
             )
         )
@@ -49,7 +53,7 @@ def compose_answer(query: str, matches: list[tuple[Fact, float]]) -> QueryRespon
             )
         )
 
-    mode = infer_mode(matches)
+    mode = infer_mode(results)
     answer = "Found evidence in the runtime MOF knowledge store:\n\n" + "\n\n".join(lines)
     return QueryResponse(
         query=query,
@@ -57,12 +61,13 @@ def compose_answer(query: str, matches: list[tuple[Fact, float]]) -> QueryRespon
         answer=answer,
         sources=sources,
         kg_facts=kg_facts,
-        retrieved_count=len(matches),
+        retrieved_count=len(results),
     )
 
 
-def infer_mode(matches: list[tuple[Fact, float]]) -> str:
-    relations = " ".join(fact.relation.lower() for fact, _ in matches)
+def infer_mode(matches: list[RetrievalMatch]) -> str:
+    results = normalize_retrieval_results(matches)
+    relations = " ".join(result.fact.relation.lower() for result in results)
     if "water stability" in relations or "experimental_property" in relations or "computational_property" in relations:
         return "hard_fact_lookup"
     if "synthesis" in relations:
@@ -73,7 +78,7 @@ def infer_mode(matches: list[tuple[Fact, float]]) -> str:
 
 
 class DeterministicAnswerer:
-    def answer(self, query: str, matches: list[tuple[Fact, float]]) -> QueryResponse:
+    def answer(self, query: str, matches: list[RetrievalMatch]) -> QueryResponse:
         return compose_answer(query, matches)
 
 

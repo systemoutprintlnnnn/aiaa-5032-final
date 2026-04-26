@@ -53,7 +53,7 @@ class KGGraphRetriever:
 
         shared_results = self._shared_neighbor_results(query_text, desired_rel_types, limit)
         if shared_results:
-            return [RetrievalResult(fact=fact, score=score) for fact, score in self._dedupe(shared_results, limit)]
+            return [RetrievalResult(fact=fact, score=score, retrieval_sources=("kg",)) for fact, score in self._dedupe(shared_results, limit)]
 
         scored: list[tuple[Fact, float]] = []
         for fact in self.facts:
@@ -67,7 +67,7 @@ class KGGraphRetriever:
                 scored = focused
 
         scored.sort(key=lambda item: item[1], reverse=True)
-        return [RetrievalResult(fact=fact, score=score) for fact, score in self._dedupe(scored, limit)]
+        return [RetrievalResult(fact=fact, score=score, retrieval_sources=("kg",)) for fact, score in self._dedupe(scored, limit)]
 
     def _load(self) -> None:
         if not self.graph_path.exists():

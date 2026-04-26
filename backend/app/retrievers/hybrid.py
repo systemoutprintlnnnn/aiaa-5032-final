@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 from app.knowledge_store import extract_explicit_identifiers, normalize_for_search
 from app.retrievers.base import RetrievalResult, Retriever
 from app.stores import Fact
@@ -12,17 +14,22 @@ class HybridRetriever:
         self.retrievers = retrievers
 
     def search(self, query: str, limit: int = 6) -> list[RetrievalResult]:
-        merged: list[RetrievalResult] = []
-        seen: set[tuple[str | None, str, str]] = set()
+        merged_by_key: dict[tuple[str | None, str, str], RetrievalResult] = {}
 
         for retriever in self.retrievers:
             for result in retriever.search(query, limit=limit):
                 key = (result.fact.refcode, result.fact.relation, result.fact.value)
-                if key in seen:
+                existing = merged_by_key.get(key)
+                if existing is None:
+                    merged_by_key[key] = result
                     continue
-                seen.add(key)
-                merged.append(result)
+                merged_by_key[key] = replace(
+                    existing,
+                    score=max(existing.score, result.score),
+                    retrieval_sources=_merge_sources(existing.retrieval_sources, result.retrieval_sources),
+                )
 
+        merged = list(merged_by_key.values())
         merged.sort(key=lambda item: item.score, reverse=True)
 
         seed_identifiers = extract_explicit_identifiers(query)
@@ -122,6 +129,14 @@ def _synthesis_completeness(fact: Fact) -> int:
         ]
         if term in text
     )
+
+
+def _merge_sources(left: tuple[str, ...], right: tuple[str, ...]) -> tuple[str, ...]:
+    merged: list[str] = []
+    for source in [*left, *right]:
+        if source and source not in merged:
+            merged.append(source)
+    return tuple(merged)
 
 
 def _fact_matches_identifier(fact: Fact, identifiers: set[str]) -> bool:

@@ -22,5 +22,5 @@ class VectorRetriever:
             fact = fact_by_id.get(str(fact_id))
             if fact is None:
                 continue
-            results.append(RetrievalResult(fact=fact, score=hit.score))
+            results.append(RetrievalResult(fact=fact, score=hit.score, retrieval_sources=("embedding",)))
         return results

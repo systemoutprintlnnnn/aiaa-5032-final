@@ -10,6 +10,7 @@ class Source(BaseModel):
     refcode: str | None = None
     evidence: str
     data_source: str
+    retrieval_sources: list[str] = Field(default_factory=list)
     license: str | None = None
 
 

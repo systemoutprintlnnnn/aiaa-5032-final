@@ -349,7 +349,16 @@ export function MofWorkbench() {
                     <li className="source-item" key={source.id}>
                       <span className="source-badge">{source.id}</span>
                       <div>
-                        <h3>{source.title}</h3>
+                        <div className="source-title-row">
+                          <h3>{source.title}</h3>
+                          <span className="source-tags" aria-label="Retrieval channels">
+                            {source.retrievalTags.map((tag) => (
+                              <span className="source-tag" key={tag}>
+                                {tag}
+                              </span>
+                            ))}
+                          </span>
+                        </div>
                         <p className="meta">{source.metadata}</p>
                         <p className="evidence">{source.evidence}</p>
                       </div>

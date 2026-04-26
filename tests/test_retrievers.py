@@ -46,6 +46,22 @@ def test_hybrid_retriever_prioritizes_synthesis_documents_for_synthesis_intent()
     assert [result.fact.relation for result in results] == ["HAS_SYNTHESIS_EVIDENCE", "KG_USES_SOLVENT"]
 
 
+def test_hybrid_retriever_merges_retrieval_sources_when_deduping():
+    fact = make_fact("CUVVOG", "MOF-ChemUnity demo.json", "HAS_EXPERIMENTAL_PROPERTY: BET Surface Area", "1137 m2 g-1")
+    retriever = HybridRetriever(
+        [
+            StaticRetriever([RetrievalResult(fact=fact, score=90.0, retrieval_sources=("embedding",))]),
+            StaticRetriever([RetrievalResult(fact=fact, score=80.0, retrieval_sources=("keyword",))]),
+        ]
+    )
+
+    results = retriever.search("What is the BET surface area of CUVVOG?", limit=5)
+
+    assert len(results) == 1
+    assert results[0].score == 90.0
+    assert results[0].retrieval_sources == ("embedding", "keyword")
+
+
 def test_hybrid_retriever_filters_vector_noise_for_explicit_entity_queries():
     seed = make_fact("RAPXEN", "MOF KG synthesis evidence", "HAS_SYNTHESIS_EVIDENCE", "solvent: CH3OH")
     neighbor = make_fact("RAPXIR", "MOF KG synthesis evidence", "HAS_SYNTHESIS_EVIDENCE", "solvent: CH3OH")

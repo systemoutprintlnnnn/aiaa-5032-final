@@ -16,6 +16,7 @@ const response: QueryResponse = {
       evidence:
         "The Brunauer-Emmett-Teller surface area was estimated to be 1137 m2 g-1.",
       data_source: "MOF-ChemUnity demo.json",
+      retrieval_sources: ["embedding", "keyword"],
       license: "MOF-ChemUnity data: CC BY-NC 4.0; code: MIT",
     },
   ],
@@ -38,6 +39,7 @@ describe("toQueryViewModel", () => {
     expect(viewModel.answer).toContain("1137 m2 g-1");
     expect(viewModel.sources[0]?.metadata).toContain("DOI 10.1039/C5CC08210B");
     expect(viewModel.sources[0]?.metadata).toContain("CSD CUVVOG");
+    expect(viewModel.sources[0]?.retrievalTags).toEqual(["Embedding", "Keyword"]);
     expect(viewModel.facts[0]?.path).toContain("Material(CUVVOG)");
   });
 
