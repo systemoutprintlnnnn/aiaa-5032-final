@@ -1,4 +1,6 @@
-# Roadmap
+# Completed Roadmap
+
+This roadmap records the final implementation state for the current submission. There is no active next milestone.
 
 ## Milestone 0: Project Rules
 
@@ -26,7 +28,7 @@ Status: implemented.
 - Runtime facts and document-style evidence are visible in the store.
 - Retrieval is behind a formal retriever interface.
 - Keyword/entity retrieval remains the default fallback.
-- Hybrid retrieval merges local and future KG/vector evidence.
+- Hybrid retrieval merges local keyword, vector, and KG evidence.
 - Smoke tests cover key sample questions.
 
 ## Milestone 3: API-First Real RAG
@@ -41,39 +43,34 @@ Status: implemented and smoke-tested.
 - `/api/rag/status` readiness endpoint.
 - Local `.env.example` and Docker Compose Qdrant setup.
 
-## Milestone 4: RAG Operations Hardening
+## Milestone 4: RAG Operations Hardening Ideas
 
-Status: next.
+Status: archived, not part of the completed submission scope.
 
-- Add safer vector indexing controls.
-- Add a repeatable real RAG smoke command.
-- Add collection readiness checks and better errors for missing vector indexes.
-- Keep the default keyword path independent from Qdrant and API availability.
+- Safer vector indexing controls, repeatable live RAG smoke commands, and collection readiness checks were considered for a larger operations iteration.
+- The submitted code keeps vector indexing as an explicit command and keeps the default keyword path independent from Qdrant and API availability.
 
-## Milestone 5: Evaluation
+## Milestone 5: Evaluation Ideas
 
-Status: planned.
+Status: archived, not part of the completed submission scope.
 
-- Build a small question set.
-- Compare keyword and hybrid vector modes.
-- Record retrieved fact IDs, source coverage, answer mode, and insufficient-evidence behavior.
-- Use results to tune retrieval order and citation verification.
+- A larger evaluation slice could compare keyword, vector, and KG retrieval modes.
+- Current automated tests cover the delivered demo behaviors, retrieval contracts, and insufficient-evidence behavior.
 
 ## Milestone 6: KG Adapter Integration
 
-Status: pending KG output.
+Status: implemented as local JSON KG retrieval.
 
-- Accept the KG teammate's graph facts through a real `GraphRetriever`.
+- Accept the KG graph export from `backend/data/kg/mof_kg.json` through `KGGraphRetriever`.
 - Preserve graph-style paths in `kg_facts`.
-- Compare keyword, vector, and graph-enhanced modes.
 - Keep KG as an additive extension.
 
 ## Milestone 7: Demo Polish
 
-Status: started.
+Status: implemented.
 
-- Prepare demo examples for property QA and synthesis/descriptive QA.
-- Add a concise project walkthrough.
+- Prepared demo examples for property QA, KG solvent QA, shared-neighbor KG QA, and synthesis/descriptive QA.
+- Added concise project walkthrough docs.
 - Keep frontend contract stable while improving presentation.
 - Keep the local workbench focused on query, answer, sources, and KG-style
   facts.

@@ -9,6 +9,10 @@ This project is a FastAPI-based MOF QA system whose runtime knowledge must come 
 ```text
 backend/data/open_source/
   MOF-ChemUnity public sample data
+reference_code/MOF_KG/3.MOF-Synthesis.json
+  team/course synthesis evidence rows
+backend/data/kg/mof_kg.json
+  local JSON KG export
         |
         v
 KnowledgeStore
@@ -26,14 +30,14 @@ KGGraphRetriever
         |
         v
 HybridRetriever
-  merges simple RAG evidence and future graph evidence
+  merges keyword, vector, and graph evidence behind one retriever contract
         |
         v
 QueryService
   retrieves facts and composes evidence-backed answer
         |
         v
-FastAPI /api/query
+FastAPI /api/query and /api/query/stream
         |
         v
 frontend Next.js TypeScript workbench
@@ -70,7 +74,7 @@ Zhipu/OpenAI-compatible OpenAILLMAnswerer or DeterministicAnswerer
 FastAPI /api/query
 ```
 
-## Target Architecture
+## Delivered Architecture
 
 ```text
 Runtime MOF data
@@ -92,7 +96,7 @@ Runtime MOF data
 - `app/config.py`: paths and runtime settings.
 - `app/data_sources/`: adapters for approved runtime files such as KG synthesis evidence.
 - `app/models.py`: API contracts.
-- `app/knowledge_store.py`: temporary in-memory normalized store.
+- `app/knowledge_store.py`: in-memory normalized store for the submitted local system.
 - `app/stores/`: normalized evidence schemas.
 - `app/retrievers/`: replaceable retrieval adapters.
 - `app/answerers/`: answer composition implementations.
@@ -101,11 +105,11 @@ Runtime MOF data
 - `app/services/`: orchestration logic.
 - `app/answerer.py`: answer composition from retrieved evidence.
 
-## Replacement Path
+## Extension Path
 
-The current `KeywordRetriever` remains an exact-match fallback. Extend or replace the real RAG path behind the same interfaces:
+The current `KeywordRetriever` remains an exact-match fallback. If the project is reopened, extension work should preserve the same interfaces:
 
-- `KGGraphRetriever` for the KG teammate's JSON graph output.
+- `KGGraphRetriever` for the checked-in local JSON graph output.
 - `VectorRetriever` backed by Qdrant for semantic retrieval.
 - `OpenAILLMAnswerer` for evidence-grounded answer generation through OpenAI-compatible chat completions. It currently targets Zhipu `glm-4.6v`.
 
@@ -119,8 +123,9 @@ frontend API client lives under `frontend/lib/` and expects the same
 - Default startup uses `RAG_RETRIEVAL_MODE=keyword` and `RAG_ENABLE_LLM=false`, so no API key or Qdrant service is required.
 - API-first real RAG uses local `.env` values. `.env` must stay ignored by Git.
 - Zhipu `embedding-3` uses 2048-dimensional vectors in this project.
-- The manually verified smoke collection is `mof_evidence_smoke`; the full `mof_evidence` collection still needs an intentional full indexing run.
+- `mof_evidence` is the configured Qdrant collection name. `mof_evidence_smoke` was used only for a small live smoke check.
 - `KGGraphRetriever` reads `backend/data/kg/mof_kg.json` when `KG_ENABLED=true`.
 - `NoResultGraphRetriever` remains the fallback when the KG file is missing, disabled, or invalid.
 - `KnowledgeStore` also loads `reference_code/MOF_KG/3.MOF-Synthesis.json` as row-level synthesis evidence documents when the file exists.
 - The vector index is built over normalized evidence documents, including KG synthesis evidence, not over `References/`.
+- With the current checked-in data, `KnowledgeStore` loads 100 demo materials, 47,823 normalized facts/documents, and 28,989 synthesis evidence rows; the KG graph retriever exposes 218,662 graph facts.

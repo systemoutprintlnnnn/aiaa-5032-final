@@ -1,4 +1,4 @@
-# MOF KG-Enhanced RAG - Current Project Plan
+# MOF KG-Enhanced RAG - Completed Project Plan
 
 ## Non-Negotiable Boundary
 
@@ -9,22 +9,23 @@ Runtime QA knowledge must come from compatible runtime data:
 - open-source MOF data with compatible license;
 - team/project-provided MOF KG or data files;
 - course-provided datasets;
-- later, explicit literature ingestion if it becomes a planned product feature.
+- explicit literature ingestion only if it becomes an approved product feature.
 
 The current runtime seed is `AI4ChemS/MOF_ChemUnity` data under `backend/data/open_source/`. Keep license notes visible: code is MIT, data/content is CC BY-NC 4.0.
 
-## Current Product Goal
+## Completed Product Scope
 
-Build a small but working MOF-specific QA system that can run locally and can be extended with KG output later.
+The project delivers a small working MOF-specific QA system that runs locally and can optionally use API-backed vector retrieval and LLM answering.
 
-The project currently supports:
+The completed scope supports:
 
 - a FastAPI backend;
 - a Next.js + TypeScript browser frontend;
 - evidence-backed answers with sources and graph-style facts;
 - a default keyword/deterministic local path;
 - an API-first real RAG path using Zhipu `embedding-3`, Qdrant, and Zhipu `glm-4.6v`;
-- a replaceable KG adapter slot.
+- local JSON KG retrieval through `KGGraphRetriever`;
+- streamed query responses through `/api/query/stream`.
 
 ## Current Architecture
 
@@ -34,10 +35,10 @@ MOF-ChemUnity runtime data
   -> normalized facts and evidence chunks
   -> KeywordRetriever fallback
   -> Qdrant VectorRetriever when enabled
-  -> KG GraphRetriever slot when available
+  -> KGGraphRetriever when KG is enabled and backend/data/kg/mof_kg.json is valid
   -> HybridRetriever
   -> DeterministicAnswerer or Zhipu-backed OpenAI-compatible LLM answerer
-  -> FastAPI /api/query
+  -> FastAPI /api/query and /api/query/stream
   -> frontend Next.js workbench
 ```
 
@@ -45,14 +46,14 @@ The default local mode remains intentionally simple and should keep working with
 
 ## Verified State
 
-- Default local API answers seeded questions such as UTSA-67 BET surface area.
-- `/api/health` reports the loaded MOF-ChemUnity seed data.
+- Default local API answers seeded questions such as UTSA-67 BET surface area, Zn(LTP)2 water stability, KG solvent lookups, and synthesis-evidence questions.
+- `/api/health` reports 100 loaded MOF-ChemUnity demo materials and 47,823 normalized facts with the current checked-in data.
 - `/api/rag/status` reports active retrieval/LLM configuration without exposing the API key.
+- The checked-in local KG JSON loads successfully and exposes 218,662 graph facts through `KGGraphRetriever`.
 - Zhipu `embedding-3` has been smoke-tested and returned 2048-dimensional vectors.
 - Qdrant has been smoke-tested with a one-point `mof_evidence_smoke` collection.
 - Zhipu `glm-4.6v` has been smoke-tested through the OpenAI-compatible chat completions path.
-
-The full `mof_evidence` vector collection still needs an intentional full indexing run before vector retrieval should be considered ready for the complete seed corpus.
+- Unit tests cover backend API, retrieval, KG graph retrieval, vector adapters, LLM answerer behavior, indexing truncation, and frontend presentation helpers.
 
 ## Development Phases
 
@@ -72,7 +73,7 @@ Status: implemented.
 - Formal retriever interface.
 - Keyword/entity retriever.
 - Hybrid retriever.
-- Empty KG adapter slot.
+- Local JSON KG graph retriever and empty fallback retriever.
 - Tests for seeded sample questions.
 
 ### Phase 3: API-First Real RAG
@@ -86,28 +87,26 @@ Status: implemented and smoke-tested.
 - Zhipu/OpenAI-compatible LLM answerer.
 - Local `.env.example`, Qdrant compose service, and runbook.
 
-### Phase 4: RAG Operations Hardening
+### Phase 4: RAG Operations Hardening Ideas
 
-Status: next priority.
+Status: archived, not an active next milestone for the completed submission.
 
-- Add safe indexing controls such as `--collection`, `--limit`, `--refcode`, `--reset`, and `--dry-run`.
-- Add a repeatable real RAG smoke command that checks `.env`, Qdrant health, collection count, retrieval, and LLM answering.
-- Add clear handling for missing or empty Qdrant collections.
-- Avoid accidental large embedding runs during development.
+- Safe indexing flags such as `--collection`, `--limit`, `--refcode`, `--reset`, and `--dry-run` were considered for a larger operations-focused iteration.
+- The current submitted code keeps indexing explicit through `PYTHONPATH=backend python3 -m app.scripts.index_vectors`.
+- Default keyword/deterministic mode remains independent from Qdrant, API keys, and LLM availability.
 
-### Phase 5: Evaluation
+### Phase 5: Evaluation Ideas
 
-Status: next priority after indexing hardening.
+Status: archived, not an active next milestone for the completed submission.
 
-- Build a small demo/evaluation question set covering:
+- If the project is reopened, an evaluation slice could compare questions covering:
   - BET surface area;
   - water stability;
   - aliases/refcodes;
   - synthesis conditions;
   - application facts;
   - insufficient-evidence behavior.
-- Compare default keyword mode against hybrid vector mode.
-- Track retrieved fact IDs, source coverage, and answer mode.
+- Current automated tests already cover the main local demo behaviors and insufficient-evidence behavior.
 
 ### Phase 6: KG Adapter Integration
 
@@ -118,6 +117,6 @@ Status: implemented as a local JSON graph adapter.
 - Preserve the existing API response contract.
 - Keep KG as an additive layer, not a blocker for local RAG.
 
-## Immediate Priority
+## Active Priority
 
-The next implementation slice should be indexing and verification tooling for the real RAG path. This turns the current manual smoke test into a repeatable command before the project spends more effort on KG or broader UI work.
+There is no active next implementation milestone. Treat this document as the completed project plan for the current codebase.

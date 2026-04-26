@@ -22,10 +22,10 @@ import type {
 import { toQueryViewModel } from "../lib/presentation";
 
 const exampleQuestions = [
-  "What synthesis evidence is available for YEXLAR?",
+  "How is QOCXUD synthesized?",
+  "Is Ga4(O3PC2H4PO3)3 water stable?",
   "What solvent is used in RAPXEN?",
-  "What other MOFs use the same solvent as RAPXEN?",
-  "What is the water stability of Zn(LTP)2?",
+  "What other MOFs use the same organic precursor as Zn6(IDC)4(OH)2(Hprz)2?",
 ];
 
 type StreamingState = {
