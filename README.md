@@ -2,7 +2,7 @@
 
 This repository is currently focused on a local MOF QA system that can run in two modes:
 
-- default local mode: keyword/entity retrieval with deterministic evidence-backed answers;
+- default local mode: keyword/entity/KG retrieval with deterministic evidence-backed answers;
 - API-first real RAG mode: Zhipu OpenAI-compatible embeddings, Qdrant vector retrieval, and a Zhipu LLM answerer.
 
 KG is an adapter layer and is not required for baseline execution.
@@ -14,6 +14,7 @@ Important distinction:
 - `References/` contains planning/reference papers and slides.
 - Runtime QA knowledge does **not** come from `References/`.
 - The current runtime seed data uses public MOF-ChemUnity sample data under `backend/data/open_source/`.
+- The local KG adapter reads team/course-provided graph data from `backend/data/kg/mof_kg.json`.
 
 ## Run Backend
 
@@ -35,6 +36,20 @@ Example query:
 curl -X POST http://127.0.0.1:8000/api/query \
   -H 'Content-Type: application/json' \
   -d '{"question":"What is the BET surface area of UTSA-67?","top_k":3}'
+```
+
+KG-backed example query:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/query \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"What solvent is used in UNABAN?","top_k":5}'
+```
+
+Regenerate the runtime KG JSON from the copied builder and source data:
+
+```bash
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli export --format json
 ```
 
 ## Run Frontend
@@ -117,7 +132,7 @@ cd frontend && npm test && npm run typecheck && npm run build
 
 - Loads public MOF-ChemUnity sample data.
 - Normalizes materials, names, properties, synthesis facts, and water-stability facts into evidence-backed facts and document-style records.
-- Supports a simple keyword/entity retriever, a Zhipu API embedding + Qdrant vector retriever, and an empty KG adapter slot through a hybrid retriever.
+- Supports a simple keyword/entity retriever, a Zhipu API embedding + Qdrant vector retriever, and a local JSON KG graph retriever through a hybrid retriever.
 - Returns deterministic evidence-based answers with:
   - source cards,
   - DOI/refcode metadata,
@@ -131,6 +146,5 @@ cd frontend && npm test && npm run typecheck && npm run build
 The next practical upgrades are:
 
 - make vector indexing safer to operate with CLI flags such as `--limit`, `--refcode`, `--collection`, and `--reset`;
-- add a small evaluation set for keyword vs hybrid retrieval;
+- add a small evaluation set for keyword vs hybrid vector vs KG retrieval;
 - tighten citation verification for LLM answers;
-- connect the KG teammate's output through the graph retriever adapter.

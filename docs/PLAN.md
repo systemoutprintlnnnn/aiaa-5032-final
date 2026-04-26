@@ -111,10 +111,10 @@ Status: next priority after indexing hardening.
 
 ### Phase 6: KG Adapter Integration
 
-Status: pending external KG output.
+Status: implemented as a local JSON graph adapter.
 
-- Define a graph fact import format.
-- Implement a real `GraphRetriever` behind the existing retriever interface.
+- Use `backend/data/kg/mof_kg.json` as the runtime KG export.
+- Implement a real `KGGraphRetriever` behind the existing retriever interface.
 - Preserve the existing API response contract.
 - Keep KG as an additive layer, not a blocker for local RAG.
 

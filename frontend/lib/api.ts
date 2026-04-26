@@ -27,6 +27,10 @@ export type QueryResponse = {
 export type RagStatus = {
   retrieval_mode: string;
   vector_store_enabled: boolean;
+  kg_enabled: boolean;
+  kg_graph_path: string;
+  kg_graph_loaded: boolean;
+  kg_fact_count: number;
   llm_enabled: boolean;
   api_key_configured: boolean;
   embedding_provider: string;

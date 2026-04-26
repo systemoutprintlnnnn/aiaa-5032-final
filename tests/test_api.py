@@ -32,6 +32,10 @@ def test_rag_status_endpoint_reports_default_runtime_mode_without_secret():
     assert data["embedding_model"] == "embedding-3"
     assert data["llm_provider"] == "zhipu"
     assert data["llm_model"] == "glm-4.6v"
+    assert data["kg_enabled"] is True
+    assert data["kg_graph_loaded"] is True
+    assert data["kg_fact_count"] > 0
+    assert data["kg_graph_path"].endswith("backend/data/kg/mof_kg.json")
 
 
 def test_query_endpoint_returns_sources_and_fact_paths():
@@ -72,6 +76,32 @@ def test_query_endpoint_supports_alias_demo_question():
     assert data["mode"] == "alias_lookup"
     assert data["sources"]
     assert any("HAS_NAME" in fact["relation"] for fact in data["kg_facts"])
+
+
+def test_query_endpoint_supports_kg_solvent_question():
+    response = client.post(
+        "/api/query",
+        json={"question": "What solvent is used in UNABAN?", "top_k": 5},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["sources"]
+    assert any(source["data_source"] == "MOF KG JSON" for source in data["sources"])
+    assert any(fact["relation"] == "KG_USES_SOLVENT" for fact in data["kg_facts"])
+
+
+def test_query_endpoint_shared_kg_question_excludes_seed_mof():
+    response = client.post(
+        "/api/query",
+        json={"question": "What other MOFs use the same solvent as UNABAN?", "top_k": 5},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["sources"]
+    assert all(source["refcode"] != "UNABAN" for source in data["sources"])
+    assert all("Material(UNABAN)" not in fact["path"] for fact in data["kg_facts"])
 
 
 def test_query_endpoint_returns_insufficient_evidence_for_unknown_question():

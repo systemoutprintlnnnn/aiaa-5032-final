@@ -4,6 +4,8 @@ from app.knowledge_store import OPEN_SOURCE_LICENSE
 from app.models import KGFact, QueryResponse, Source
 from app.stores import Fact
 
+KG_LICENSE_NOTICE = "Team/course-provided MOF KG data; no explicit public license supplied."
+
 
 def compose_answer(query: str, matches: list[tuple[Fact, float]]) -> QueryResponse:
     if not matches:
@@ -35,7 +37,7 @@ def compose_answer(query: str, matches: list[tuple[Fact, float]]) -> QueryRespon
                 refcode=fact.refcode,
                 evidence=fact.evidence,
                 data_source=fact.data_source,
-                license=OPEN_SOURCE_LICENSE,
+                license=source_license(fact),
             )
         )
         kg_facts.append(
@@ -73,3 +75,9 @@ def infer_mode(matches: list[tuple[Fact, float]]) -> str:
 class DeterministicAnswerer:
     def answer(self, query: str, matches: list[tuple[Fact, float]]) -> QueryResponse:
         return compose_answer(query, matches)
+
+
+def source_license(fact: Fact) -> str:
+    if fact.data_source == "MOF KG JSON":
+        return KG_LICENSE_NOTICE
+    return OPEN_SOURCE_LICENSE

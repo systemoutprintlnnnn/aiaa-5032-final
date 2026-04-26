@@ -36,6 +36,23 @@ Current collection names:
 
 Do not commit generated vector stores, Qdrant storage, caches, or local `.env` files.
 
+## Team KG Runtime Data
+
+The KG adapter uses team/course-provided graph data, not `References/`.
+
+Runtime export:
+
+- `backend/data/kg/mof_kg.json`
+
+Builder inputs:
+
+- `reference_code/MOF_KG/1.water_stability_chemunity_v0.1.0.csv`
+- `reference_code/MOF_KG/2.MOF_names_and_CSD_codes.csv`
+- `reference_code/MOF_KG/3.MOF-Synthesis.json`
+
+No explicit public license was supplied with the KG package. Treat it as
+project/course runtime data unless licensing is clarified.
+
 ## Reference-Only Repositories
 
 `MontageBai/KGFM` is useful as a method reference. It does not currently expose an explicit license, so do not import its data or code into this repository unless licensing is clarified.

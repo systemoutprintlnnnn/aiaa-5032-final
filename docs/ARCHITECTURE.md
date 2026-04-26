@@ -20,8 +20,8 @@ KeywordRetriever
   simple local RAG-style retrieval
         |
         v
-NoResultGraphRetriever
-  KG adapter slot until graph data is available
+KGGraphRetriever
+  optional local JSON graph evidence from backend/data/kg/mof_kg.json
         |
         v
 HybridRetriever
@@ -57,7 +57,7 @@ VectorRetriever
         |
         +---- KeywordRetriever fallback
         |
-        +---- NoResultGraphRetriever KG slot
+        +---- KGGraphRetriever local JSON graph layer
         |
         v
 HybridRetriever
@@ -103,7 +103,7 @@ Runtime MOF data
 
 The current `KeywordRetriever` remains an exact-match fallback. Extend or replace the real RAG path behind the same interfaces:
 
-- `GraphRetriever` for the KG teammate's output.
+- `KGGraphRetriever` for the KG teammate's JSON graph output.
 - `VectorRetriever` backed by Qdrant for semantic retrieval.
 - `OpenAILLMAnswerer` for evidence-grounded answer generation through OpenAI-compatible chat completions. It currently targets Zhipu `glm-4.6v`.
 
@@ -118,4 +118,5 @@ frontend API client lives under `frontend/lib/` and expects the same
 - API-first real RAG uses local `.env` values. `.env` must stay ignored by Git.
 - Zhipu `embedding-3` uses 2048-dimensional vectors in this project.
 - The manually verified smoke collection is `mof_evidence_smoke`; the full `mof_evidence` collection still needs an intentional full indexing run.
-- `NoResultGraphRetriever` is a placeholder until the KG team provides data.
+- `KGGraphRetriever` reads `backend/data/kg/mof_kg.json` when `KG_ENABLED=true`.
+- `NoResultGraphRetriever` remains the fallback when the KG file is missing, disabled, or invalid.

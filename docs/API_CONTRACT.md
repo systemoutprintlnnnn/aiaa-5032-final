@@ -80,6 +80,10 @@ Response:
 {
   "retrieval_mode": "keyword",
   "vector_store_enabled": false,
+  "kg_enabled": true,
+  "kg_graph_path": "/absolute/path/backend/data/kg/mof_kg.json",
+  "kg_graph_loaded": true,
+  "kg_fact_count": 218662,
   "llm_enabled": false,
   "api_key_configured": false,
   "api_base_url": "https://open.bigmodel.cn/api/paas/v4/",
@@ -99,4 +103,5 @@ Response:
 - `mode` should remain stable enough for frontend filtering and future ablation demos.
 - If evidence is missing, return `mode = "insufficient_evidence"` with empty `sources` and `kg_facts`.
 - `api_key_configured` may be `true`, but the API key itself must never be returned.
+- KG fields report graph availability only; they must not expose secrets.
 - The response contract must stay stable when swapping keyword, vector, LLM, or KG internals.

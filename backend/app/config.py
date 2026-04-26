@@ -25,10 +25,20 @@ class Settings(BaseModel):
     rag_enable_llm: bool = False
     rag_llm_provider: str = "zhipu"
     rag_llm_model: str = "glm-4.6v"
+    kg_enabled: bool = True
+    kg_graph_path: Path | None = None
 
     @property
     def open_source_data_dir(self) -> Path:
         return self.backend_dir / "data" / "open_source"
+
+    @property
+    def resolved_kg_graph_path(self) -> Path:
+        if self.kg_graph_path is None:
+            return self.backend_dir / "data" / "kg" / "mof_kg.json"
+        if self.kg_graph_path.is_absolute():
+            return self.kg_graph_path
+        return self.backend_dir.parent / self.kg_graph_path
 
     def require_api_key(self, feature: str) -> str:
         from app.rag.embeddings import RAGConfigurationError
@@ -52,6 +62,8 @@ class Settings(BaseModel):
             rag_enable_llm=parse_bool(os.getenv("RAG_ENABLE_LLM", "false")),
             rag_llm_provider=os.getenv("RAG_LLM_PROVIDER", "zhipu"),
             rag_llm_model=os.getenv("RAG_LLM_MODEL", "glm-4.6v"),
+            kg_enabled=parse_bool(os.getenv("KG_ENABLED", "true")),
+            kg_graph_path=Path(os.getenv("KG_GRAPH_PATH")) if os.getenv("KG_GRAPH_PATH") else None,
         )
 
 
