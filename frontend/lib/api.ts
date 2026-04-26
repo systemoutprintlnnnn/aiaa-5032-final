@@ -5,6 +5,7 @@ export type ApiSource = {
   refcode?: string | null;
   evidence: string;
   data_source?: string | null;
+  retrieval_sources?: string[] | null;
   license?: string | null;
 };
 

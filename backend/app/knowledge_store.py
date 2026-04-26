@@ -6,20 +6,25 @@ import re
 from pathlib import Path
 from typing import Any
 
+from app.data_sources.synthesis import SynthesisEvidenceRecord, load_synthesis_evidence_records
 from app.stores import Document, Fact
 
 
 OPEN_SOURCE_LICENSE = "MOF-ChemUnity data: CC BY-NC 4.0; code: MIT"
+KG_RUNTIME_LICENSE_NOTICE = "Team/course-provided MOF KG data; no explicit public license supplied."
+KG_SYNTHESIS_DATA_SOURCE = "MOF KG synthesis evidence"
 
 
 class KnowledgeStore:
     """In-memory seed-data store backed by public MOF-ChemUnity sample data."""
 
-    def __init__(self, data_dir: Path) -> None:
+    def __init__(self, data_dir: Path, synthesis_data_path: Path | None = None) -> None:
         self.data_dir = data_dir
+        self.synthesis_data_path = synthesis_data_path
         self.facts: list[Fact] = []
         self.documents: list[Document] = []
         self.material_count = 0
+        self.synthesis_evidence_count = 0
         self._load()
 
     def _load(self) -> None:
@@ -33,6 +38,8 @@ class KnowledgeStore:
             self._load_water_stability(water_path)
         if names_path.exists():
             self._load_names(names_path)
+        if self.synthesis_data_path is not None:
+            self._load_synthesis_evidence(self.synthesis_data_path)
 
     def _load_demo(self, path: Path) -> None:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -195,6 +202,40 @@ class KnowledgeStore:
             path=f"Material({refcode}) -> HAS_SYNTHESIS -> Synthesis",
         )
 
+    def _load_synthesis_evidence(self, path: Path) -> None:
+        for record in load_synthesis_evidence_records(path):
+            self._add_synthesis_evidence_fact(record)
+            self.synthesis_evidence_count += 1
+
+    def _add_synthesis_evidence_fact(self, record: SynthesisEvidenceRecord) -> None:
+        search_text = " ".join([record.refcode, *record.names, "HAS_SYNTHESIS_EVIDENCE", record.value, record.evidence, record.doi or ""])
+        fact = Fact(
+            id=f"kg-synthesis-{record.row_index}",
+            refcode=record.refcode,
+            material_names=record.names,
+            relation="HAS_SYNTHESIS_EVIDENCE",
+            value=record.value,
+            evidence=record.evidence,
+            doi=record.doi,
+            data_source=KG_SYNTHESIS_DATA_SOURCE,
+            path=f"Material({record.refcode}) -> HAS_SYNTHESIS_EVIDENCE -> SynthesisRecord:{record.row_index}",
+            search_text=normalize_for_search(search_text),
+        )
+        self.facts.append(fact)
+        self.documents.append(
+            Document(
+                id=f"doc-{fact.id}",
+                text=f"{record.refcode}. {fact.relation}: {fact.value}. Evidence: {fact.evidence}",
+                refcode=fact.refcode,
+                material_names=fact.material_names,
+                relation=fact.relation,
+                source=fact.data_source,
+                doi=fact.doi,
+                license=KG_RUNTIME_LICENSE_NOTICE,
+                fact_id=fact.id,
+            )
+        )
+
     def _add_fact(
         self,
         *,
@@ -207,6 +248,7 @@ class KnowledgeStore:
         data_source: str,
         path: str,
         fact_id: str | None = None,
+        license: str = OPEN_SOURCE_LICENSE,
     ) -> None:
         fact_id = fact_id or f"fact-{len(self.facts)}"
         text = " ".join([refcode or "", *names, relation, value, evidence, doi or ""])
@@ -232,7 +274,7 @@ class KnowledgeStore:
                 relation=fact.relation,
                 source=fact.data_source,
                 doi=fact.doi,
-                license=OPEN_SOURCE_LICENSE,
+                license=license,
                 fact_id=fact.id,
             )
         )
@@ -378,7 +420,20 @@ def relation_bonus(query_text: str, relation: str) -> float:
     bonus = 0.0
     if any(word in query_text for word in ["water", "stable", "stability", "soluble"]) and "water stability" in relation_text:
         bonus += 4.0
-    if any(word in query_text for word in ["synthesis", "synthesize", "solvent", "temperature", "precursor"]) and "synthesis" in relation_text:
+    synthesis_terms = [
+        "synthesis",
+        "synthesize",
+        "solvent",
+        "temperature",
+        "precursor",
+        "procedure",
+        "yield",
+        "reaction time",
+        "method",
+        "linker",
+        "ligand",
+    ]
+    if any(word in query_text for word in synthesis_terms) and "synthesis" in relation_text:
         bonus += 4.0
     if any(word in query_text for word in ["name", "alias", "coreference", "called"]) and "has_name" in relation_text:
         bonus += 3.0
@@ -397,7 +452,10 @@ def infer_desired_relations(query_text: str) -> set[str]:
     desired: set[str] = set()
     if any(word in query_text for word in ["water", "stable", "stability", "soluble"]):
         desired.add("water stability")
-    if any(word in query_text for word in ["synthesis", "synthesize", "solvent", "temperature", "precursor", "conditions"]):
+    if any(
+        word in query_text
+        for word in ["synthesis", "synthesize", "solvent", "temperature", "precursor", "conditions", "procedure", "yield", "reaction time", "method", "linker", "ligand"]
+    ):
         desired.add("synthesis")
     if any(word in query_text for word in ["name", "alias", "coreference", "called", "associated"]):
         desired.add("name")

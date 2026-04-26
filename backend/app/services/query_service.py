@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from app.answerers.deterministic import DeterministicAnswerer, compose_answer
 from app.models import QueryRequest, QueryResponse
+from app.retrievers.base import RetrievalResult
 from app.retrievers.base import Retriever
-from app.stores import Fact
 
 
 class QueryService:
@@ -15,12 +15,11 @@ class QueryService:
         matches = self._retrieve(request)
         return self.answerer.answer(request.question, matches)
 
-    def retrieve_matches(self, request: QueryRequest) -> list[tuple[Fact, float]]:
+    def retrieve_matches(self, request: QueryRequest) -> list[RetrievalResult]:
         return self._retrieve(request)
 
-    def baseline_response(self, request: QueryRequest, matches: list[tuple[Fact, float]]) -> QueryResponse:
+    def baseline_response(self, request: QueryRequest, matches: list[RetrievalResult]) -> QueryResponse:
         return compose_answer(request.question, matches)
 
-    def _retrieve(self, request: QueryRequest) -> list[tuple[Fact, float]]:
-        results = self.retriever.search(request.question, limit=request.top_k)
-        return [(result.fact, result.score) for result in results]
+    def _retrieve(self, request: QueryRequest) -> list[RetrievalResult]:
+        return self.retriever.search(request.question, limit=request.top_k)

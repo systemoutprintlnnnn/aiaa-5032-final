@@ -11,4 +11,7 @@ class KeywordRetriever:
         self.store = store
 
     def search(self, query: str, limit: int = 6) -> list[RetrievalResult]:
-        return [RetrievalResult(fact=fact, score=score) for fact, score in self.store.search(query, limit=limit)]
+        return [
+            RetrievalResult(fact=fact, score=score, retrieval_sources=("keyword",))
+            for fact, score in self.store.search(query, limit=limit)
+        ]

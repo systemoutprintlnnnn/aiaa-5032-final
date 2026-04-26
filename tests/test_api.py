@@ -48,6 +48,8 @@ def test_query_endpoint_returns_sources_and_fact_paths():
     data = response.json()
     assert data["mode"] == "hard_fact_lookup"
     assert data["sources"]
+    assert data["sources"][0]["retrieval_sources"]
+    assert "keyword" in data["sources"][0]["retrieval_sources"]
     assert data["kg_facts"]
     assert "1137" in data["answer"]
 
@@ -88,7 +90,25 @@ def test_query_endpoint_supports_kg_solvent_question():
     data = response.json()
     assert data["sources"]
     assert any(source["data_source"] == "MOF KG JSON" for source in data["sources"])
+    assert any("kg" in source["retrieval_sources"] for source in data["sources"])
     assert any(fact["relation"] == "KG_USES_SOLVENT" for fact in data["kg_facts"])
+
+
+def test_query_endpoint_uses_synthesis_evidence_documents():
+    response = client.post(
+        "/api/query",
+        json={"question": "What synthesis evidence is available for YEXLAR?", "top_k": 5},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["mode"] == "descriptive_synthesis_lookup"
+    assert data["sources"]
+    assert data["sources"][0]["data_source"] == "MOF KG synthesis evidence"
+    assert data["sources"][0]["doi"] == "10.1021/acs.cgd.8b00344"
+    assert "Conventional solvothermal" in data["sources"][0]["evidence"]
+    assert "433.15 K" in data["sources"][0]["evidence"]
+    assert any(fact["relation"] == "HAS_SYNTHESIS_EVIDENCE" for fact in data["kg_facts"])
 
 
 def test_query_endpoint_shared_kg_question_excludes_seed_mof():

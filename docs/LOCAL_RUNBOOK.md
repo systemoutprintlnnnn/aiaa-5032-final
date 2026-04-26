@@ -48,7 +48,10 @@ Build the vector index:
 PYTHONPATH=backend python3 -m app.scripts.index_vectors
 ```
 
-This indexes all normalized evidence chunks into `RAG_QDRANT_COLLECTION`. With the current MOF-ChemUnity seed data this is a real embedding API run, so do it intentionally.
+This indexes all normalized evidence chunks into `RAG_QDRANT_COLLECTION`. The
+current corpus includes MOF-ChemUnity seed facts plus row-level KG synthesis
+evidence from `reference_code/MOF_KG/3.MOF-Synthesis.json` when that file is
+present. This is a real embedding API run, so do it intentionally.
 
 Run the backend:
 
@@ -85,6 +88,13 @@ Expected real RAG status after sourcing `.env`:
 ```
 
 The manually verified smoke path used `mof_evidence_smoke` with one UTSA-67 BET evidence chunk. The full `mof_evidence` collection should be indexed before using hybrid mode broadly.
+
+Useful smoke questions after indexing:
+
+- `What synthesis evidence is available for YEXLAR?`
+- `What solvent is used in RAPXEN?`
+- `What is the water stability of Zn(LTP)2?`
+- `What other MOFs use the same solvent as RAPXEN?`
 
 ## Frontend
 

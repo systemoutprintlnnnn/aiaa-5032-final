@@ -6,6 +6,8 @@ retriever.
 ## Runtime File
 
 - `mof_kg.json`: read-only runtime KG export loaded by `KGGraphRetriever`.
+- `reference_code/MOF_KG/3.MOF-Synthesis.json`: row-level synthesis evidence
+  loaded by `KnowledgeStore` for RAG evidence documents.
 
 ## Source Inputs
 
@@ -34,3 +36,6 @@ embedded, or used as the runtime QA corpus.
 The KG files are team/course-provided runtime data. No explicit public data
 license was supplied with the KG package, so do not describe this data as open
 source unless licensing is clarified.
+
+Benchmark files are not loaded into the runtime corpus by default. They are
+reserved for evaluation and demo question selection.

@@ -13,6 +13,7 @@ backend/data/open_source/
         v
 KnowledgeStore
   normalizes materials, aliases, properties, synthesis, evidence
+  also loads row-level KG synthesis evidence documents
   exposes facts and document-style records
         |
         v
@@ -89,6 +90,7 @@ Runtime MOF data
 
 - `app/main.py`: FastAPI app construction and route registration.
 - `app/config.py`: paths and runtime settings.
+- `app/data_sources/`: adapters for approved runtime files such as KG synthesis evidence.
 - `app/models.py`: API contracts.
 - `app/knowledge_store.py`: temporary in-memory normalized store.
 - `app/stores/`: normalized evidence schemas.
@@ -120,3 +122,5 @@ frontend API client lives under `frontend/lib/` and expects the same
 - The manually verified smoke collection is `mof_evidence_smoke`; the full `mof_evidence` collection still needs an intentional full indexing run.
 - `KGGraphRetriever` reads `backend/data/kg/mof_kg.json` when `KG_ENABLED=true`.
 - `NoResultGraphRetriever` remains the fallback when the KG file is missing, disabled, or invalid.
+- `KnowledgeStore` also loads `reference_code/MOF_KG/3.MOF-Synthesis.json` as row-level synthesis evidence documents when the file exists.
+- The vector index is built over normalized evidence documents, including KG synthesis evidence, not over `References/`.

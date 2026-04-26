@@ -15,6 +15,7 @@ Important distinction:
 - Runtime QA knowledge does **not** come from `References/`.
 - The current runtime seed data uses public MOF-ChemUnity sample data under `backend/data/open_source/`.
 - The local KG adapter reads team/course-provided graph data from `backend/data/kg/mof_kg.json`.
+- The RAG evidence layer also reads team/course-provided synthesis evidence from `reference_code/MOF_KG/3.MOF-Synthesis.json`.
 
 ## Run Backend
 
@@ -44,6 +45,14 @@ KG-backed example query:
 curl -X POST http://127.0.0.1:8000/api/query \
   -H 'Content-Type: application/json' \
   -d '{"question":"What solvent is used in UNABAN?","top_k":5}'
+```
+
+Synthesis evidence example query:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/query \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"What synthesis evidence is available for YEXLAR?","top_k":5}'
 ```
 
 Regenerate the runtime KG JSON from the copied builder and source data:
@@ -109,6 +118,10 @@ Build the vector index:
 PYTHONPATH=backend python3 -m app.scripts.index_vectors
 ```
 
+The index is built from normalized evidence documents. That includes the
+MOF-ChemUnity seed facts and row-level KG synthesis evidence documents when
+`reference_code/MOF_KG/3.MOF-Synthesis.json` is present.
+
 Then start the backend and frontend using the same commands above.
 
 For a fuller local checklist, see `docs/LOCAL_RUNBOOK.md`.
@@ -131,7 +144,7 @@ cd frontend && npm test && npm run typecheck && npm run build
 ## Current Capabilities
 
 - Loads public MOF-ChemUnity sample data.
-- Normalizes materials, names, properties, synthesis facts, and water-stability facts into evidence-backed facts and document-style records.
+- Normalizes materials, names, properties, synthesis facts, KG synthesis evidence rows, and water-stability facts into evidence-backed facts and document-style records.
 - Supports a simple keyword/entity retriever, a Zhipu API embedding + Qdrant vector retriever, and a local JSON KG graph retriever through a hybrid retriever.
 - Returns deterministic evidence-based answers with:
   - source cards,
