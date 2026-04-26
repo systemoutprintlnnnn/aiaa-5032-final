@@ -44,5 +44,9 @@ qdrant_storage/
 neo4j_data/
 backend/data/kg/dataset/
 
+# Reference code snapshots
+reference_code/aiaa-5032-final-kg/
+reference_code/merged-rag-kg/
+
 # Generated notebooks/checkpoints
 .ipynb_checkpoints/

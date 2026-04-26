@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -208,7 +209,12 @@ class KGGraphRetriever:
                 for related in self._facts_by_target.get(target_id, []):
                     if related.refcode in seed_refcodes:
                         continue
-                    expanded.append((related, 40.0 + (8.0 if rel_type in desired_rel_types else 0.0)))
+                    expanded.append(
+                        (
+                            _with_shared_neighbor_evidence(related, seed_fact, rel_type),
+                            40.0 + (8.0 if rel_type in desired_rel_types else 0.0),
+                        )
+                    )
                     if len(expanded) >= limit:
                         return expanded
         return expanded
@@ -290,6 +296,16 @@ def _human_relation(rel_type: str) -> str:
         "CITED_IN": "KG_CITED_IN",
     }
     return mapping.get(rel_type, f"KG_{rel_type}")
+
+
+def _with_shared_neighbor_evidence(related: Fact, seed: Fact, rel_type: str) -> Fact:
+    seed_subject = seed.refcode or (seed.material_names[0] if seed.material_names else "the seed MOF")
+    related_subject = related.refcode or (related.material_names[0] if related.material_names else "this MOF")
+    evidence = (
+        f"{related.evidence} Shared-neighbor context: {seed_subject} and {related_subject} "
+        f"both have KG relation {rel_type} to {related.value}."
+    )
+    return replace(related, evidence=evidence)
 
 
 def _target_value(attrs: dict[str, Any], node_id: str) -> str:

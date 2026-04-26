@@ -120,6 +120,7 @@ def test_kg_graph_retriever_expands_shared_neighbor_without_seed_mof(tmp_path):
 
     assert results
     assert results[0].fact.refcode == "OTHER1"
+    assert "UNABAN and OTHER1 both have KG relation USES_SOLVENT to water" in results[0].fact.evidence
     assert all(result.fact.refcode != "UNABAN" for result in results)
 
 

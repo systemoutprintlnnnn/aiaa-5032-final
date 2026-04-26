@@ -29,6 +29,9 @@ class HybridRetriever:
             seed_identifiers = extract_explicit_identifiers(query)
             if seed_identifiers:
                 merged = [result for result in merged if not _fact_matches_identifier(result.fact, seed_identifiers)]
+            kg_results = [result for result in merged if result.fact.data_source == "MOF KG JSON"]
+            if kg_results:
+                merged = kg_results
 
         return merged[:limit]
 
