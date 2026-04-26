@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mof-kg"
+version = "0.1.0"
+description = "MOF Knowledge Graph Builder"
+requires-python = ">=3.10"
+dependencies = [
+    "networkx>=3.0",
+    "pydantic>=2.0",
+]
+
+[project.scripts]
+mof-kg = "mof_kg.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

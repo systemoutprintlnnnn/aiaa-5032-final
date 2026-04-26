@@ -8,6 +8,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -41,6 +42,7 @@ pnpm-debug.log*
 *.sqlite3
 qdrant_storage/
 neo4j_data/
+backend/data/kg/dataset/
 
 # Generated notebooks/checkpoints
 .ipynb_checkpoints/

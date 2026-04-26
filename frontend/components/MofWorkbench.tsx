@@ -166,13 +166,14 @@ export function MofWorkbench() {
     ? "Backend offline"
     : status
       ? status.llm_enabled
-        ? `${status.retrieval_mode} · ${status.llm_model}`
-        : `${status.retrieval_mode} · deterministic`
+        ? `${status.retrieval_mode} · ${status.llm_model}${status.kg_graph_loaded ? " · KG" : ""}`
+        : `${status.retrieval_mode} · deterministic${status.kg_graph_loaded ? " · KG" : ""}`
       : "Connecting…";
 
   const runtimeFooter = status
     ? [
         `retrieval=${status.retrieval_mode}`,
+        `kg=${status.kg_graph_loaded ? status.kg_fact_count : "off"}`,
         `embedding=${status.embedding_model}`,
         `engine=${status.llm_enabled ? status.llm_model : "deterministic"}`,
         `collection=${status.qdrant_collection}`,

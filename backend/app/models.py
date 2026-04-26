@@ -44,6 +44,10 @@ class HealthResponse(BaseModel):
 class RAGStatusResponse(BaseModel):
     retrieval_mode: str
     vector_store_enabled: bool
+    kg_enabled: bool
+    kg_graph_path: str
+    kg_graph_loaded: bool
+    kg_fact_count: int
     llm_enabled: bool
     api_key_configured: bool
     api_base_url: str

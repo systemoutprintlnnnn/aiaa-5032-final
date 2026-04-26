@@ -68,6 +68,10 @@ Expected real RAG status after sourcing `.env`:
 {
   "retrieval_mode": "hybrid",
   "vector_store_enabled": true,
+  "kg_enabled": true,
+  "kg_graph_path": "/absolute/path/backend/data/kg/mof_kg.json",
+  "kg_graph_loaded": true,
+  "kg_fact_count": 218662,
   "llm_enabled": true,
   "api_key_configured": true,
   "api_base_url": "https://open.bigmodel.cn/api/paas/v4/",

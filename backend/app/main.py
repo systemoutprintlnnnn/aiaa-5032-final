@@ -14,7 +14,7 @@ from app.knowledge_store import KnowledgeStore
 from app.models import HealthResponse, QueryRequest, QueryResponse, RAGStatusResponse
 from app.rag.embeddings import OpenAIEmbeddingProvider
 from app.rag.vector_store import QdrantVectorStore
-from app.retrievers import HybridRetriever, KeywordRetriever, NoResultGraphRetriever, VectorRetriever
+from app.retrievers import HybridRetriever, KGGraphRetriever, KeywordRetriever, NoResultGraphRetriever, VectorRetriever
 from app.services import QueryService
 
 
@@ -40,7 +40,13 @@ if settings.rag_retrieval_mode in {"vector", "hybrid"}:
 if settings.rag_retrieval_mode in {"keyword", "hybrid"}:
     retrievers.append(KeywordRetriever(store))
 
-retrievers.append(NoResultGraphRetriever())
+graph_retriever = NoResultGraphRetriever()
+if settings.kg_enabled:
+    candidate_graph_retriever = KGGraphRetriever(settings.resolved_kg_graph_path)
+    if candidate_graph_retriever.is_loaded:
+        graph_retriever = candidate_graph_retriever
+
+retrievers.append(graph_retriever)
 retriever = HybridRetriever(retrievers)
 
 answerer = DeterministicAnswerer()
@@ -76,6 +82,10 @@ def rag_status() -> RAGStatusResponse:
     return RAGStatusResponse(
         retrieval_mode=settings.rag_retrieval_mode,
         vector_store_enabled=settings.rag_retrieval_mode in {"vector", "hybrid"},
+        kg_enabled=settings.kg_enabled,
+        kg_graph_path=str(settings.resolved_kg_graph_path),
+        kg_graph_loaded=graph_retriever.is_loaded,
+        kg_fact_count=graph_retriever.fact_count,
         llm_enabled=settings.rag_enable_llm,
         api_key_configured=bool(settings.rag_api_key),
         api_base_url=settings.rag_api_base_url,
