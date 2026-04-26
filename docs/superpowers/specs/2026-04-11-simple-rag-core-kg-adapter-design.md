@@ -1,5 +1,7 @@
 # Simple RAG Core With KG Adapter Slot Design
 
+> Archive notice: this is a historical design note from the implementation phase. It may use words such as "next" or "should" from that time. For the current completed codebase, use `docs/PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/API_CONTRACT.md` as the source of truth.
+
 ## Purpose
 
 This project should first become a complete local MOF question-answering system, not a blocked KG integration project.

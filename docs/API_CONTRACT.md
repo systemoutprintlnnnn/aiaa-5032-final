@@ -10,7 +10,7 @@ Response:
 {
   "status": "ok",
   "materials": 100,
-  "facts": 18834,
+  "facts": 47823,
   "data_source": "AI4ChemS/MOF_ChemUnity public sample data"
 }
 ```
@@ -66,10 +66,38 @@ Response:
 Modes currently used:
 
 - `hard_fact_lookup`: deterministic answer from structured property-like evidence.
+- `descriptive_synthesis_lookup`: deterministic answer from synthesis evidence.
 - `alias_lookup`: deterministic answer for material aliases/refcodes.
 - `keyword_retrieval`: deterministic fallback answer from retrieved evidence.
 - `hybrid_rag`: LLM answer composed from retrieved evidence.
 - `insufficient_evidence`: no runtime evidence found.
+
+## `POST /api/query/stream`
+
+Streams the same query contract as newline-delimited JSON events. The frontend uses this endpoint for incremental answer rendering.
+
+Request:
+
+```json
+{
+  "question": "What synthesis evidence is available for YEXLAR?",
+  "top_k": 6
+}
+```
+
+Events:
+
+```json
+{"type":"meta","query":"...","mode":"descriptive_synthesis_lookup","sources":[{"id":"S1","title":"...","evidence":"...","data_source":"MOF KG synthesis evidence","retrieval_sources":["keyword"],"license":"..."}],"kg_facts":[{"path":"...","relation":"HAS_SYNTHESIS_EVIDENCE","value":"...","source_id":"S1"}],"retrieved_count":1}
+{"type":"token","text":"..."}
+{"type":"done","mode":"descriptive_synthesis_lookup","answer":"..."}
+```
+
+On failure, the stream emits:
+
+```json
+{"type":"error","message":"..."}
+```
 
 ## `GET /api/rag/status`
 
@@ -102,7 +130,7 @@ Response:
 - `sources` must contain the evidence used by the answer.
 - `sources[].retrieval_sources` reports how the evidence was retrieved. Current values are `kg`, `embedding`, and `keyword`.
 - `kg_facts` must point to a source via `source_id`.
-- `mode` should remain stable enough for frontend filtering and future ablation demos.
+- `mode` should remain stable enough for frontend display and tests.
 - If evidence is missing, return `mode = "insufficient_evidence"` with empty `sources` and `kg_facts`.
 - `api_key_configured` may be `true`, but the API key itself must never be returned.
 - KG fields report graph availability only; they must not expose secrets.

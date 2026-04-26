@@ -1,5 +1,7 @@
 # API-First Real RAG Design
 
+> Archive notice: this is a historical design note from the implementation phase. It may use words such as "next" or "should" from that time. For the current completed codebase, use `docs/PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/API_CONTRACT.md` as the source of truth.
+
 ## Purpose
 
 The current project is a runnable local MOF QA baseline, but its retrieval is keyword/entity-based. The next phase should turn it into a real RAG system that uses:

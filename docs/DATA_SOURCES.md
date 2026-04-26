@@ -27,11 +27,11 @@ License notes from upstream:
 
 ## Derived Runtime Indexes
 
-Qdrant collections are derived runtime indexes over normalized MOF-ChemUnity facts. They must be built from `backend/data/open_source/` or another approved runtime source, not from `References/`.
+Qdrant collections are derived runtime indexes over normalized evidence documents. They must be built from `backend/data/open_source/`, `reference_code/MOF_KG/3.MOF-Synthesis.json`, or another approved runtime source, not from `References/`.
 
 Current collection names:
 
-- `mof_evidence`: intended full evidence index for the seed corpus.
+- `mof_evidence`: configured full evidence index for the seed corpus.
 - `mof_evidence_smoke`: small local smoke-test collection used to verify Zhipu embeddings and Qdrant retrieval.
 
 Do not commit generated vector stores, Qdrant storage, caches, or local `.env` files.
@@ -58,25 +58,27 @@ The synthesis JSON is loaded as row-level evidence documents in addition to
 being used by the offline builder. Each row remains an independent runtime
 evidence record so variants that share a CSD identifier are not silently merged.
 
+Current checked-in runtime scale:
+
+- `KnowledgeStore`: 100 demo materials, 47,823 normalized facts/documents, and 28,989 synthesis evidence rows.
+- `KGGraphRetriever`: 218,662 graph facts from `backend/data/kg/mof_kg.json`.
+
 No explicit public license was supplied with the KG package. Treat it as
 project/course runtime data unless licensing is clarified.
 
-## Benchmark Files
+## Benchmark And Evaluation Files
 
-The files under the externally provided `tests/` package, such as
-`MOF_synthesis_benchmark.xlsx`, `matching_benchmark.csv`, and
-`water_stability_Ansari_benchmark_results.csv`, are useful for evaluation and
-demo question selection. They are not loaded as the default runtime QA corpus.
+No benchmark spreadsheet or CSV files are loaded by the runtime QA path. If external benchmark files are added later, keep them separate from the default QA corpus unless the project explicitly promotes them to runtime data.
 
 ## Reference-Only Repositories
 
 `MontageBai/KGFM` is useful as a method reference. It does not currently expose an explicit license, so do not import its data or code into this repository unless licensing is clarified.
 
-## Future Data Sources
+## Optional Data Sources If The Project Is Reopened
 
-Candidates:
+Potential candidates remain:
 
 - team-provided Neo4j graph or CSV export;
 - course-provided MOF datasets;
 - CoRE MOF / QMOF-derived properties, if license and access are compatible;
-- new curated literature extraction outputs, if that becomes a planned product feature.
+- new curated literature extraction outputs, if the project explicitly adds literature ingestion as a product feature.

@@ -1,3 +1,5 @@
+> 归档说明：本文是 KG + RAG 创新方向的历史设计备忘，不是当前项目的待办清单。当前已完成代码和运行方式以 `docs/PLAN.md`、`docs/ARCHITECTURE.md`、`docs/API_CONTRACT.md` 和根目录 `README.md` 为准。
+
 二、创新点分析
 2.1 KG + RAG 结合的创新方向
 

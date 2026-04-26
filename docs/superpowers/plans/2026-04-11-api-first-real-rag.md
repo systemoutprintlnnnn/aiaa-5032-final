@@ -1,5 +1,7 @@
 # API-First Real RAG Implementation Plan
 
+> Archive notice: this is a historical implementation plan. Checklist items and "next milestone" language are retained as provenance, not as current project status. For the current completed codebase, use `docs/PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/API_CONTRACT.md` as the source of truth.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a real RAG path that uses API embeddings, Qdrant vector search, and API LLM answer generation while preserving the current keyword fallback and KG adapter slot.

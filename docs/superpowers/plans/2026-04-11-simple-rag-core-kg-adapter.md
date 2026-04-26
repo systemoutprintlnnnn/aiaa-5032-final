@@ -1,5 +1,7 @@
 # Simple RAG Core With KG Adapter Slot Implementation Plan
 
+> Archive notice: this is a historical implementation plan. Checklist items and "next milestone" language are retained as provenance, not as current project status. For the current completed codebase, use `docs/PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/API_CONTRACT.md` as the source of truth.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Turn the current working FastAPI MVP into a complete local simple RAG baseline with a clean KG adapter slot.

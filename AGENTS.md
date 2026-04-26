@@ -11,23 +11,23 @@ Runtime knowledge must come from one of these sources:
 - open-source MOF data with compatible license;
 - team/project-provided MOF KG or data files;
 - course-provided datasets;
-- later, real literature ingestion when explicitly added as a product feature.
+- real literature ingestion only when explicitly added as a product feature.
 
 The current runtime seed data is in `backend/data/open_source/` and comes from `AI4ChemS/MOF_ChemUnity`. Keep its license notes visible: code is MIT, data/content is CC BY-NC 4.0.
 
-## Coding Strategy
+## Delivery State
 
-The first milestone was end-to-end behavior, not a perfect RAG stack. That milestone is now implemented.
+The project is complete for the current submission scope.
 
-Build in this order:
+Implemented scope:
 
-1. Deterministic backend API with evidence-backed answers. Implemented.
-2. Minimal frontend that calls the API and displays answer, sources, and KG-style facts. Implemented.
-3. Replaceable retrieval interfaces. Implemented.
-4. Qdrant vector retrieval. Implemented as an API-first path and smoke-tested with Zhipu embeddings.
-5. LLM generation. Implemented through a Zhipu OpenAI-compatible chat completions adapter.
-6. Neo4j/Text-to-Cypher graph retrieval. Future KG adapter work.
-7. Citation verification and evaluation. Next hardening work.
+1. Deterministic backend API with evidence-backed answers.
+2. Minimal frontend that calls the API and displays answer, sources, and KG-style facts.
+3. Replaceable retrieval interfaces.
+4. Qdrant vector retrieval as an API-first path, smoke-tested with Zhipu embeddings.
+5. LLM generation through a Zhipu OpenAI-compatible chat completions adapter.
+6. Local JSON KG retrieval through `KGGraphRetriever`.
+7. Streamed query responses through `/api/query/stream`.
 
 Do not let Qdrant, KG, or LLM failures break the default keyword/deterministic local path.
 
@@ -42,7 +42,7 @@ Keep backend modules small and replaceable:
 - `models.py`: Pydantic request/response/data contracts.
 - `main.py`: FastAPI wiring only.
 
-Future adapters should preserve the same shape:
+Extension adapters should preserve the same shape if this project is reopened:
 
 - `VectorRetriever` can replace keyword retrieval.
 - `Neo4jRetriever` can replace or supplement in-memory KG facts.

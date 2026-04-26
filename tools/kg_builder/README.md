@@ -4,8 +4,8 @@
 
 ## 目录结构
 
-```
-MOF_KG_builder/
+```text
+tools/kg_builder/
 ├── README.md                  # 本文件
 ├── pyproject.toml             # Python 项目配置
 ├── requirements.txt           # 依赖
@@ -29,23 +29,26 @@ MOF_KG_builder/
 │       ├── __init__.py
 │       ├── graph_builder.py    # 图构建主逻辑
 │       └── exporters.py        # 导出器 (JSON/Cypher/GraphML)
-├── output/                    # 输出目录
-│   ├── kg/                    # 知识图谱数据
-│   │   ├── mof_kg.json        # JSON 格式
-│   │   ├── mof_kg.cypher      # Neo4j Cypher 脚本
-│   │   └── mof_kg.graphml     # GraphML 格式（可视化）
-│   └── dataset/               # 评估数据集
+├── ../../backend/data/kg/      # 当前配置的输出目录
+│   ├── mof_kg.json             # JSON 格式，后端直接读取
+│   ├── mof_kg.cypher           # Neo4j Cypher 脚本
+│   ├── mof_kg.graphml          # GraphML 格式（可视化）
+│   └── dataset/                # 评估数据集和统计信息
 │       ├── qa_evaluation_dataset_en.json  # QA 评估数据集
-│       ├── kg_statistics.json # KG 统计信息
-│       └── DATASET_README.md  # 数据集说明文档
-└── tests/
-    └── test_build.py
+│       └── kg_statistics.json  # KG 统计信息
 ```
 
-## 安装
+## 当前仓库内使用
 
 ```bash
-cd /mnt/data2/binma/course_project/aiaa5032/final_project/MOF_KG_builder
+cd /Users/tjzhou/Desktop/AIWorkspace/homework/aiaa-5032-final
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli --help
+```
+
+如需以 editable package 形式安装：
+
+```bash
+cd /Users/tjzhou/Desktop/AIWorkspace/homework/aiaa-5032-final/tools/kg_builder
 pip install -e .
 ```
 
@@ -54,13 +57,13 @@ pip install -e .
 ### 查看帮助
 
 ```bash
-python -m mof_kg.cli --help
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli --help
 ```
 
 ### 构建 KG
 
 ```bash
-python -m mof_kg.cli build
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli build
 ```
 
 输出示例：
@@ -70,47 +73,47 @@ Building MOF Knowledge Graph...
 === Graph Statistics ===
   mof_nodes: 27,961
   stability_nodes: 2
-  precursor_nodes: 23,470
+  precursor_nodes: 22,501
   method_nodes: 5
   doi_nodes: 13,760
   name_nodes: 18,316
   relationships: 218,662
 
-Shared precursors: 10204
+Shared precursors: 6,783
 Top 5 most shared precursors:
-  H2O: used by 5648 MOFs
-  water: used by 5037 MOFs
+  H2O: used by 3,738 MOFs
+  water: used by 3,146 MOFs
   ...
 ```
 
 ### 查看统计信息
 
 ```bash
-python -m mof_kg.cli stats
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli stats
 ```
 
 ### 导出 KG
 
 ```bash
 # 导出所有格式
-python -m mof_kg.cli export --format all
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli export --format all
 
 # 只导出 JSON
-python -m mof_kg.cli export --format json
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli export --format json
 
 # 只导出 Cypher（用于 Neo4j）
-python -m mof_kg.cli export --format cypher
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli export --format cypher
 
 # 只导出 GraphML（用于 Gephi/Cytoscape 可视化）
-python -m mof_kg.cli export --format graphml
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli export --format graphml
 ```
 
 ### 查询 KG
 
 ```bash
 # 查找使用特定前驱体的 MOF
-python -m mof_kg.cli query --precursor "water"
-python -m mof_kg.cli query --precursor "Zn(NO3)2⋅6H2O"
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli query --precursor "water"
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.cli query --precursor "Zn(NO3)2⋅6H2O"
 ```
 
 ---
@@ -165,7 +168,7 @@ python -m mof_kg.cli query --precursor "Zn(NO3)2⋅6H2O"
 
 ## 数据来源
 
-KG 从以下三个数据文件构建（位于 `../MOF_KG/` 目录）：
+KG 从以下三个数据文件构建（位于仓库根目录的 `reference_code/MOF_KG/`）：
 
 | 文件 | 记录数 | 用途 |
 |------|--------|------|
@@ -179,10 +182,10 @@ KG 从以下三个数据文件构建（位于 `../MOF_KG/` 目录）：
 
 | 文件 | 格式 | 用途 |
 |------|------|------|
-| `mof_kg.json` | JSON | 供 RAG 系统直接读取 |
-| `mof_kg.cypher` | Cypher | 导入 Neo4j 图数据库 |
-| `mof_kg.graphml` | GraphML | 用 Gephi/Cytoscape 可视化 |
-| `kg_statistics.json` | JSON | KG 统计信息摘要 |
+| `backend/data/kg/mof_kg.json` | JSON | 供 RAG 系统直接读取 |
+| `backend/data/kg/mof_kg.cypher` | Cypher | 导入 Neo4j 图数据库 |
+| `backend/data/kg/mof_kg.graphml` | GraphML | 用 Gephi/Cytoscape 可视化 |
+| `backend/data/kg/dataset/kg_statistics.json` | JSON | KG 统计信息摘要 |
 
 ---
 
@@ -212,7 +215,7 @@ shared = builder.find_shared_precursors(data)
 print(f"Shared precursors: {len(shared)}")
 
 # 导出到 JSON
-exporter = JSONExporter(config.output_dir / "mof_kg.json")
+exporter = JSONExporter(config.kg_output_dir / "mof_kg.json")
 exporter.export(data)
 ```
 
@@ -221,12 +224,12 @@ exporter.export(data)
 ## 导入 Neo4j
 
 1. 启动 Neo4j 数据库
-2. 在 Neo4j Browser 中打开 `output/mof_kg.cypher`
+2. 在 Neo4j Browser 中打开 `backend/data/kg/mof_kg.cypher`
 3. 执行脚本（或使用 `cypher-shell` 命令行工具）
 
 ```bash
 # 使用 cypher-shell 导入
-cypher-shell -u neo4j -p password < output/mof_kg.cypher
+cypher-shell -u neo4j -p password < backend/data/kg/mof_kg.cypher
 ```
 
 ---
@@ -236,7 +239,7 @@ cypher-shell -u neo4j -p password < output/mof_kg.cypher
 使用 GraphML 文件在 Gephi 或 Cytoscape 中可视化：
 
 1. 打开 Gephi
-2. File → Open → 选择 `output/mof_kg.graphml`
+2. File → Open → 选择 `backend/data/kg/mof_kg.graphml`
 3. 使用布局算法（如 ForceAtlas2）进行可视化
 
 ---
@@ -247,7 +250,7 @@ cypher-shell -u neo4j -p password < output/mof_kg.cypher
 节点统计:
   MOF 节点:        27,961
   稳定性节点:      2 (Stable, Unstable)
-  前驱体节点:      23,470
+  前驱体节点:      22,501
     - 金属前驱体:   6,825
     - 有机配体:     12,582
     - 溶剂:         3,094
@@ -257,21 +260,17 @@ cypher-shell -u neo4j -p password < output/mof_kg.cypher
   
 关系统计:
   总关系数:        218,662
+  总节点数:        82,545
 
 共享节点统计:
-  共享前驱体数:    10,204 (被多个 MOF 使用)
+  共享前驱体数:    6,783 (被多个 MOF 使用)
   
-Top 10 最共享的前驱体:
-  H2O:              5,648 MOFs
-  water:            5,037 MOFs
-  methanol:         3,100 MOFs
-  aqueous solution: 2,979 MOFs
-  DMF:              2,780 MOFs
-  NaOH:             2,663 MOFs
-  distilled water:  1,741 MOFs
-  ethanol:          1,717 MOFs
-  Zn(NO3)2⋅6H2O:    1,467 MOFs
-  MeOH:             1,303 MOFs
+Top 5 最共享的前驱体:
+  H2O:              3,738 MOFs
+  water:            3,146 MOFs
+  NaOH:             1,947 MOFs
+  DMF:              1,877 MOFs
+  aqueous solution: 1,776 MOFs
 ```
 
 ---
@@ -282,10 +281,10 @@ Top 10 最共享的前驱体:
 
 ```bash
 # 生成 500 个 QA pairs (每种类型 100 个)
-python -m mof_kg.generate_qa_dataset --count 100
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.generate_qa_dataset --count 100
 
 # 指定输出文件名
-python -m mof_kg.generate_qa_dataset --count 100 --output my_dataset.json
+PYTHONPATH=tools/kg_builder/src python3 -m mof_kg.generate_qa_dataset --count 100 --output my_dataset.json
 ```
 
 ### 数据集类型
@@ -300,18 +299,15 @@ python -m mof_kg.generate_qa_dataset --count 100 --output my_dataset.json
 
 ### 数据集说明
 
-详细的数据集说明请参见：`output/DATASET_README.md`
+生成的数据集默认写入 `backend/data/kg/dataset/`。
 
 ## 文件路径参考
 
 | 路径 | 说明 |
 |------|------|
-| `../MOF_KG/` | 源数据目录 |
-| `./output/` | 输出目录 |
-| `./output/kg/` | 知识图谱数据 |
-| `./output/kg/mof_kg.json` | KG 数据 (JSON) |
-| `./output/kg/mof_kg.cypher` | KG 数据 (Neo4j Cypher) |
-| `./output/dataset/` | 评估数据集 |
-| `./output/dataset/qa_evaluation_dataset_en.json` | 评估数据集 |
-| `./output/dataset/DATASET_README.md` | 数据集说明文档 |
-| `./src/mof_kg/` | 源代码目录 |
+| `reference_code/MOF_KG/` | 源数据目录 |
+| `backend/data/kg/` | 当前配置的 KG 输出目录 |
+| `backend/data/kg/mof_kg.json` | 后端运行时 KG 数据 (JSON) |
+| `backend/data/kg/mof_kg.cypher` | KG 数据 (Neo4j Cypher) |
+| `backend/data/kg/dataset/` | 评估数据集和统计信息输出目录 |
+| `tools/kg_builder/src/mof_kg/` | 源代码目录 |

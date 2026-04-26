@@ -1,11 +1,11 @@
 # MOF KG-Enhanced RAG
 
-This repository is currently focused on a local MOF QA system that can run in two modes:
+This repository contains the completed local MOF QA/RAG system for the current submission. It can run in two modes:
 
 - default local mode: keyword/entity/KG retrieval with deterministic evidence-backed answers;
 - API-first real RAG mode: Zhipu OpenAI-compatible embeddings, Qdrant vector retrieval, and a Zhipu LLM answerer.
 
-KG is an adapter layer and is not required for baseline execution.
+KG is an additive adapter layer and is not required for baseline execution. The default local path remains keyword/entity retrieval with deterministic evidence-backed answers.
 
 Project planning docs live in `docs/`, especially `docs/PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/API_CONTRACT.md`.
 
@@ -16,6 +16,8 @@ Important distinction:
 - The current runtime seed data uses public MOF-ChemUnity sample data under `backend/data/open_source/`.
 - The local KG adapter reads team/course-provided graph data from `backend/data/kg/mof_kg.json`.
 - The RAG evidence layer also reads team/course-provided synthesis evidence from `reference_code/MOF_KG/3.MOF-Synthesis.json`.
+
+Current checked-in runtime data loads 100 demo materials, 47,823 normalized facts/documents, 28,989 row-level synthesis evidence records, and 218,662 local KG graph facts.
 
 ## Run Backend
 
@@ -120,19 +122,19 @@ PYTHONPATH=backend python3 -m app.scripts.index_vectors
 
 The index is built from normalized evidence documents. That includes the
 MOF-ChemUnity seed facts and row-level KG synthesis evidence documents when
-`reference_code/MOF_KG/3.MOF-Synthesis.json` is present.
+`reference_code/MOF_KG/3.MOF-Synthesis.json` is present. `mof_evidence` is the
+configured full collection name; `mof_evidence_smoke` was used only for a small
+live smoke check.
 
 Then start the backend and frontend using the same commands above.
 
 For a fuller local checklist, see `docs/LOCAL_RUNBOOK.md`.
 
-Current verified smoke path:
+Verified live API smoke path:
 
 - Zhipu `embedding-3` returned 2048-dimensional vectors.
 - Qdrant accepted and retrieved a smoke `mof_evidence_smoke` point.
 - Backend returned `mode=hybrid_rag` for the UTSA-67 BET surface area question with Zhipu `glm-4.6v`.
-
-Before treating the vector path as production-ready for the whole seed dataset, build the full `mof_evidence` Qdrant collection with the indexing script.
 
 ## Run Tests
 
@@ -151,13 +153,10 @@ cd frontend && npm test && npm run typecheck && npm run build
   - DOI/refcode metadata,
   - graph-style fact paths.
 - Can use an API LLM answerer when `RAG_ENABLE_LLM=true`.
+- Can stream query responses through `/api/query/stream`.
 - Provides a Next.js + TypeScript local workbench for querying FastAPI and
   reviewing answer evidence.
 
-## Next Upgrade
+## Completion State
 
-The next practical upgrades are:
-
-- make vector indexing safer to operate with CLI flags such as `--limit`, `--refcode`, `--collection`, and `--reset`;
-- add a small evaluation set for keyword vs hybrid vector vs KG retrieval;
-- tighten citation verification for LLM answers;
+There is no active next milestone for this repository. Historical design notes under `docs/superpowers/` are retained as provenance and are not the current source of truth.

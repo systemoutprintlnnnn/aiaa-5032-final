@@ -9,6 +9,8 @@ retriever.
 - `reference_code/MOF_KG/3.MOF-Synthesis.json`: row-level synthesis evidence
   loaded by `KnowledgeStore` for RAG evidence documents.
 
+Current checked-in `mof_kg.json` contains 82,545 nodes and 218,662 relationships. The backend exposes those relationships as 218,662 graph facts when `KG_ENABLED=true`.
+
 ## Source Inputs
 
 The offline builder input files are kept under `reference_code/MOF_KG/`:
@@ -37,5 +39,4 @@ The KG files are team/course-provided runtime data. No explicit public data
 license was supplied with the KG package, so do not describe this data as open
 source unless licensing is clarified.
 
-Benchmark files are not loaded into the runtime corpus by default. They are
-reserved for evaluation and demo question selection.
+Benchmark files are not loaded into the runtime corpus by default.

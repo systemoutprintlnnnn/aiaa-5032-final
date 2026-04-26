@@ -16,6 +16,8 @@ curl http://127.0.0.1:8000/api/health
 curl http://127.0.0.1:8000/api/rag/status
 ```
 
+With the checked-in data, `/api/health` reports 100 materials and 47,823 facts. `/api/rag/status` reports keyword retrieval, deterministic answering, and a loaded local KG graph when `backend/data/kg/mof_kg.json` is present.
+
 Ask a seeded MOF question:
 
 ```bash
@@ -42,7 +44,7 @@ source .env
 set +a
 ```
 
-Build the vector index:
+Build the vector index when using the optional API-backed RAG path:
 
 ```bash
 PYTHONPATH=backend python3 -m app.scripts.index_vectors
@@ -87,7 +89,7 @@ Expected real RAG status after sourcing `.env`:
 }
 ```
 
-The manually verified smoke path used `mof_evidence_smoke` with one UTSA-67 BET evidence chunk. The full `mof_evidence` collection should be indexed before using hybrid mode broadly.
+The manually verified smoke path used `mof_evidence_smoke` with one UTSA-67 BET evidence chunk. `mof_evidence` is the configured collection name for an intentionally built local vector index.
 
 Useful smoke questions after indexing:
 
