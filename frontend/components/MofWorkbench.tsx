@@ -22,9 +22,10 @@ import type {
 import { toQueryViewModel } from "../lib/presentation";
 
 const exampleQuestions = [
-  "What is the BET surface area of UTSA-67?",
-  "Is UTSA-67 water stable?",
-  "What synthesis evidence is available for CUVVOG?",
+  "What synthesis evidence is available for YEXLAR?",
+  "What solvent is used in RAPXEN?",
+  "What other MOFs use the same solvent as RAPXEN?",
+  "What is the water stability of Zn(LTP)2?",
 ];
 
 type StreamingState = {
@@ -211,7 +212,7 @@ export function MofWorkbench() {
                 onChange={(event) => setQuestion(event.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={3}
-                placeholder="e.g. What is the BET surface area of UTSA-67?"
+                placeholder="e.g. What synthesis evidence is available for YEXLAR?"
                 spellCheck={false}
               />
               <div className="ask__actions">
